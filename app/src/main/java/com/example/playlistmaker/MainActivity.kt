@@ -1,6 +1,9 @@
 package com.example.playlistmaker
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -11,5 +14,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+
+        val searchButton = findViewById<Button>(R.id.search)
+        searchButton.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+        }
+
+        val mediaButton = findViewById<Button>(R.id.media)
+        mediaButton.setOnClickListener {
+            val intent = Intent(this, MediaActivity::class.java)
+            startActivity(intent)
+        }
+
+        val settingsButton = findViewById<Button>(R.id.settings)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
