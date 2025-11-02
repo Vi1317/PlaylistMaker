@@ -20,6 +20,8 @@
         style="@style/SwitchSettingsElement"
         android:layout_marginTop="@dimen/padding_24"
         android:checked="false"
+        app:thumbTint="@color/blue"
+        app:trackTint="@color/blue_light"
         android:text="@string/theme"/>
 
     <com.google.android.material.textview.MaterialTextView

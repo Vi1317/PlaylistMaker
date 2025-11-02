@@ -7,10 +7,10 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.getSystemService
+import androidx.core.widget.addTextChangedListener
 import com.google.android.material.appbar.MaterialToolbar
 
 class SearchActivity : AppCompatActivity() {
@@ -34,23 +34,16 @@ class SearchActivity : AppCompatActivity() {
 
         clearButton.setOnClickListener {
             searchText.setText("")
+            clearButton.visibility = View.GONE
+
+            val imm = getSystemService<InputMethodManager>()
+            imm?.hideSoftInputFromWindow(searchText.windowToken, 0)
         }
 
-        val simpleTextWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // empty
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                clearButton.visibility = clearButtonVisibility(s)
-                currentText = s.toString()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // empty
-            }
+        searchText.addTextChangedListener { text ->
+            clearButton.visibility = clearButtonVisibility(text)
+            currentText = text?.toString() ?: ""
         }
-        searchText.addTextChangedListener(simpleTextWatcher)
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -61,14 +54,18 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    companion object {
+        private const val SEARCH_TEXT = "search_text"
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("search_text", currentText)
+        outState.putString(SEARCH_TEXT, currentText)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val restoredText = savedInstanceState.getString("search_text", "")
+        val restoredText = savedInstanceState.getString(SEARCH_TEXT, "")
         searchText.setText(restoredText)
     }
 }
