@@ -5,28 +5,27 @@
     android:layout_height="match_parent"
     android:id="@+id/main"
     android:orientation="vertical"
-    android:background="@color/blue"
-    android:paddingStart="@dimen/padding_16"
-    android:paddingEnd="@dimen/padding_16"
+    android:background="?attr/colorSecondary"
+    android:paddingHorizontal="@dimen/padding_16"
     android:paddingBottom="@dimen/padding_28">
 
-    <TextView style="@style/header"
-        android:text="@string/app_name"
-        android:textColor="@color/white">
-    </TextView>
+    <com.google.android.material.appbar.MaterialToolbar style="@style/HeaderToolbar"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white">
+    </com.google.android.material.appbar.MaterialToolbar>
 
-    <Button style="@style/main_menu_buttons"
+    <Button style="@style/MainMenuButtons"
         android:id="@+id/search"
         android:text="@string/search"
         app:icon="@drawable/ic_search_24"
         android:layout_marginTop="@dimen/padding_24"/>
 
-    <Button style="@style/main_menu_buttons"
+    <Button style="@style/MainMenuButtons"
         android:id="@+id/media"
         android:text="@string/media"
         app:icon="@drawable/ic_media_24" />
 
-    <Button style="@style/main_menu_buttons"
+    <Button style="@style/MainMenuButtons"
         android:id="@+id/settings"
         android:text="@string/settings"
         app:icon="@drawable/ic_settings_24" />
