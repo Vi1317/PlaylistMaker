@@ -1,101 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical"
-    android:background="@color/white"
-    android:paddingStart="@dimen/padding_16"
-    android:paddingEnd="@dimen/padding_16">
+    android:paddingHorizontal="@dimen/padding_16">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/back"
+        style="@style/HeaderToolbar"
+        app:navigationIcon="@drawable/ic_back_24"
+        app:title="@string/settings">
+    </com.google.android.material.appbar.MaterialToolbar>
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/back"
-            android:src="@drawable/ic_back_24"
-            android:layout_marginEnd="@dimen/padding_24" />
-
-        <TextView style="@style/header"
-            android:text="@string/settings">
-        </TextView>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/theme_switch"
+        style="@style/SwitchSettingsElement"
         android:layout_marginTop="@dimen/padding_24"
-        android:orientation="vertical">
+        android:checked="false"
+        app:thumbTint="@color/blue"
+        app:trackTint="@color/blue_light"
+        android:text="@string/theme"/>
 
-        <LinearLayout
-            style="@style/settings_menu_element"
-            android:id="@+id/theme_switch">
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/share"
+        style="@style/TextSettingsElement"
+        android:drawableEnd="@drawable/ic_share_24"
+        android:text="@string/share" />
 
-            <TextView
-                style="@style/settings_menu_text"
-                android:text="@string/theme">
-            </TextView>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/support"
+        style="@style/TextSettingsElement"
+        android:drawableEnd="@drawable/ic_support_24"
+        android:text="@string/support" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="false"/>
-        </LinearLayout>
-
-        <LinearLayout
-            style="@style/settings_menu_element"
-            android:id="@+id/share">
-
-            <TextView
-                style="@style/settings_menu_text"
-                android:text="@string/share">
-            </TextView>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/share"
-                android:src="@drawable/ic_share_24" />
-        </LinearLayout>
-
-        <LinearLayout
-            style="@style/settings_menu_element"
-            android:id="@+id/support">
-
-            <TextView
-                style="@style/settings_menu_text"
-                android:text="@string/support">
-            </TextView>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/support"
-                android:src="@drawable/ic_support_24" />
-        </LinearLayout>
-
-        <LinearLayout
-            style="@style/settings_menu_element"
-            android:id="@+id/agreement">
-
-            <TextView
-                style="@style/settings_menu_text"
-                android:text="@string/agreement">
-            </TextView>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/agreement"
-                android:src="@drawable/ic_forward_24" />
-        </LinearLayout>
-
-    </LinearLayout>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/agreement"
+        style="@style/TextSettingsElement"
+        android:drawableEnd="@drawable/ic_forward_24"
+        android:text="@string/agreement" />
 
 </LinearLayout>
