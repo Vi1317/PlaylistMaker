@@ -36,7 +36,10 @@
         android:textColor="@color/black"
         android:drawableStart="@drawable/ic_search_16"
         app:drawableTint="?attr/colorPrimaryVariant"
-        android:drawablePadding="8dp"/>
+        android:drawablePadding="8dp"
+
+        android:imeOptions="actionDone"
+        android:singleLine="true"/>
 
     <ImageView
         android:id="@+id/clear_search"
@@ -59,4 +62,55 @@
         tools:listitem="@layout/track_list_item"
         android:layout_marginTop="@dimen/padding_16"
         android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/not_found_error"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingTop="102dp">
+
+        <ImageView
+            android:id="@+id/not_found_error_img"
+            style="@style/SearchErrorImg"
+            android:src="@drawable/not_found_error"
+            android:contentDescription="@string/not_found_error_title" />
+
+        <TextView
+            android:id="@+id/not_found_error_title"
+            style="@style/SearchErrorTitle"
+            android:text="@string/not_found_error_title"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/connection_error"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingTop="102dp">
+
+        <ImageView
+            android:id="@+id/connection_error_img"
+            style="@style/SearchErrorImg"
+            android:src="@drawable/connection_error"
+            android:contentDescription="@string/connection_error_title" />
+
+        <TextView
+            android:id="@+id/connection_error_title"
+            style="@style/SearchErrorTitle"
+            android:text="@string/connection_error_title"/>
+
+        <Button
+            android:id="@+id/retry_button"
+            style="@style/SearchErrorButton"
+            android:text="@string/retry"/>
+
+    </LinearLayout>
 </LinearLayout>

@@ -21,4 +21,7 @@
 
     <string name="forward">Вперед</string>
     <string name="cover">Обложка</string>
+    <string name="connection_error_title">Проблемы со связью \n\n Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="retry">Обновить</string>
+    <string name="not_found_error_title">Ничего не нашлось</string>
 </resources>
