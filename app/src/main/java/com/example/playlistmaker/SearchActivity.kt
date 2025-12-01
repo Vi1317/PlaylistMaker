@@ -21,9 +21,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
-    private val iTunesBaseUrl = "https://itunes.apple.com/"
     private val retrofit = Retrofit.Builder()
-        .baseUrl(iTunesBaseUrl)
+        .baseUrl(ITUNES_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -105,6 +104,7 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SEARCH_TEXT = "search_text"
+        private const val ITUNES_BASE_URL = "https://itunes.apple.com/"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -126,23 +126,22 @@ class SearchActivity : AppCompatActivity() {
                         call: Call<TracksResponse?>,
                         response: Response<TracksResponse?>
                     ) {
-                        when (response.code()) {
-                            200 -> {
-                                if (response.body()?.results?.isNotEmpty() == true) {
-                                    tracks.clear()
-                                    tracks.addAll(response.body()?.results!!)
-                                    trackAdapter.notifyDataSetChanged()
-                                    showSearchResults()
-                                } else {
-                                    tracks.clear()
-                                    trackAdapter.notifyDataSetChanged()
-                                }
-                                if (tracks.isEmpty()) {
-                                    showNotFoundError()
-                                }
+                        if (response.isSuccessful) {
+                            val searchResults = response.body()?.results
+
+                            if (!searchResults.isNullOrEmpty()) {
+                                tracks.clear()
+                                tracks.addAll(searchResults)
+                                trackAdapter.notifyDataSetChanged()
+                                showSearchResults()
+                            } else {
+                                tracks.clear()
+                                trackAdapter.notifyDataSetChanged()
+                            }
+                            if (tracks.isEmpty()) {
+                                showNotFoundError()
                             }
                         }
-
                     }
 
                     override fun onFailure(call: Call<TracksResponse?>, t: Throwable) {
