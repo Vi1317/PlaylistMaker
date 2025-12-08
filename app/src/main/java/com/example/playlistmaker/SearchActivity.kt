@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -31,6 +32,9 @@ class SearchActivity : AppCompatActivity() {
     private val tracks = ArrayList<Track>()
     private val trackAdapter = TrackAdapter(tracks)
 
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var sharedPreferences: SharedPreferences
+
     private lateinit var searchText: EditText
     private var currentText: String = ""
     private lateinit var clearButton: ImageView
@@ -39,10 +43,19 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var retryButton: Button
     private lateinit var trackList: RecyclerView
 
+    private lateinit var historyLayout: LinearLayout
+    private lateinit var clearHistoryButton: Button
+    private lateinit var historyList: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_search)
+
+        sharedPreferences = getSharedPreferences(
+            "app_preferences",
+            MODE_PRIVATE
+        )
+        searchHistory = SearchHistory(sharedPreferences)
 
         val backButton = findViewById<MaterialToolbar>(R.id.back)
         backButton.setNavigationOnClickListener {
@@ -50,8 +63,16 @@ class SearchActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        historyLayout = findViewById<LinearLayout>(R.id.history)
+        clearHistoryButton = findViewById<Button>(R.id.clear_history_button)
+        historyList = findViewById<RecyclerView>(R.id.history_list)
+        historyList.adapter = trackAdapter
+
         trackList = findViewById<RecyclerView>(R.id.track_list)
         trackList.adapter = trackAdapter
+        trackAdapter.onTrackClick = {
+            searchHistory.write(it)
+        }
 
         searchText = findViewById<EditText>(R.id.search_text)
         clearButton = findViewById<ImageView>(R.id.clear_search)
@@ -66,6 +87,7 @@ class SearchActivity : AppCompatActivity() {
             trackList.visibility = View.GONE
             notConnect.visibility = View.GONE
             notFound.visibility = View.GONE
+            showHistory()
 
             closeKeyboard()
         }
@@ -73,7 +95,12 @@ class SearchActivity : AppCompatActivity() {
         searchText.addTextChangedListener { text ->
             clearButton.visibility = clearButtonVisibility(text)
             currentText = text?.toString() ?: ""
-            trackList.visibility = View.VISIBLE
+            //trackList.visibility = View.VISIBLE
+            if (currentText != "") {
+                historyLayout.visibility = View.GONE
+            } else {
+                showHistory()
+            }
         }
 
         searchText.setOnEditorActionListener { _, actionId, _ ->
@@ -92,6 +119,8 @@ class SearchActivity : AppCompatActivity() {
                 searchTracks()
             }
         }
+
+        showHistory()
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -154,9 +183,33 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun showHistory() {
+        tracks.clear()
+        val historyItems = searchHistory.read()
+        if(!historyItems.isEmpty()) {
+            notConnect.visibility = View.GONE
+            notFound.visibility = View.GONE
+            trackList.visibility = View.GONE
+            historyLayout.visibility = View.VISIBLE
+
+            tracks.addAll(historyItems)
+            trackAdapter.notifyDataSetChanged()
+        } else {
+            historyLayout.visibility = View.GONE
+        }
+
+        clearHistoryButton.setOnClickListener {
+            tracks.clear()
+            searchHistory.clear()
+            trackAdapter.notifyDataSetChanged()
+            historyLayout.visibility = View.GONE
+        }
+    }
+
     private fun showSearchResults() {
         notConnect.visibility = View.GONE
         notFound.visibility = View.GONE
+        historyLayout.visibility = View.GONE
         trackList.visibility = View.VISIBLE
         closeKeyboard()
     }
@@ -165,12 +218,14 @@ class SearchActivity : AppCompatActivity() {
         notConnect.visibility = View.GONE
         notFound.visibility = View.VISIBLE
         trackList.visibility = View.GONE
+        historyLayout.visibility = View.GONE
     }
 
     private fun showConnectionError() {
         notConnect.visibility = View.VISIBLE
         notFound.visibility = View.GONE
         trackList.visibility = View.GONE
+        historyLayout.visibility = View.GONE
         closeKeyboard()
     }
 
