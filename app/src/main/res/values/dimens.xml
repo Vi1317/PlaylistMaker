@@ -3,8 +3,11 @@
     <dimen name="field_height">36dp</dimen>
     <dimen name="padding_28">28dp</dimen>
     <dimen name="padding_24">24dp</dimen>
+    <dimen name="padding_18">18dp</dimen>
     <dimen name="padding_16">16dp</dimen>
     <dimen name="padding_14">14dp</dimen>
+    <dimen name="padding_12">14dp</dimen>
+
     <dimen name="main_text">22sp</dimen>
     <dimen name="menu_text">16sp</dimen>
     <dimen name="button_text">14sp</dimen>

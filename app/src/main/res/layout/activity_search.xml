@@ -13,55 +13,88 @@
         android:id="@+id/back"
         style="@style/HeaderToolbar"
         app:navigationIcon="@drawable/ic_back_24"
-        app:title="@string/search">
-    </com.google.android.material.appbar.MaterialToolbar>
+        app:title="@string/search"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp">
 
-    <EditText
-        android:id="@+id/search_text"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/field_height"
-        android:background="@drawable/search_bg"
+        <EditText
+            android:id="@+id/search_text"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/field_height"
+            android:autofillHints=""
 
-        android:textColorHint="?attr/colorPrimaryVariant"
-        android:autofillHints=""
-        android:hint="@string/search"
-        android:inputType="text"
-        android:maxLines="1"
-        android:textSize="@dimen/menu_text"
-        android:textColor="@color/black"
-        android:drawableStart="@drawable/ic_search_16"
-        app:drawableTint="?attr/colorPrimaryVariant"
-        android:drawablePadding="8dp"
+            android:background="@drawable/search_bg"
+            android:drawableStart="@drawable/ic_search_16"
+            android:drawablePadding="8dp"
+            android:hint="@string/search"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textColorHint="?attr/colorPrimaryVariant"
 
-        android:imeOptions="actionDone"
-        android:singleLine="true"/>
+            android:textSize="@dimen/menu_text"
+            app:drawableTint="?attr/colorPrimaryVariant" />
 
-    <ImageView
-        android:id="@+id/clear_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_clear_16"
-        android:contentDescription="@string/search"
-        app:tint="?attr/colorPrimaryVariant"
-        android:visibility="gone" />
+        <ImageView
+            android:id="@+id/clear_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/search"
+            android:src="@drawable/ic_clear_16"
+            android:visibility="gone"
+            app:tint="?attr/colorPrimaryVariant" />
     </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/track_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:orientation="vertical"
-        tools:listitem="@layout/track_list_item"
         android:layout_marginTop="@dimen/padding_16"
-        android:visibility="gone"/>
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/track_list_item" />
+
+    <LinearLayout
+        android:id="@+id/history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            style="@style/SearchErrorTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingHorizontal="@dimen/padding_16"
+            android:paddingTop="@dimen/padding_18"
+            android:paddingBottom="@dimen/padding_12"
+            android:text="@string/history"
+            android:textAlignment="center"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/history_list"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/track_list_item"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/clear_history_button"
+            style="@style/SearchErrorButton"
+            android:text="@string/clear"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/not_found_error"
@@ -70,19 +103,20 @@
         android:layout_weight="1"
         android:gravity="top|center_horizontal"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:paddingTop="102dp">
+        android:paddingTop="102dp"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/not_found_error_img"
             style="@style/SearchErrorImg"
-            android:src="@drawable/not_found_error"
-            android:contentDescription="@string/not_found_error_title" />
+            android:contentDescription="@string/not_found_error_title"
+            android:src="@drawable/not_found_error" />
 
         <TextView
             android:id="@+id/not_found_error_title"
             style="@style/SearchErrorTitle"
-            android:text="@string/not_found_error_title"/>
+            android:layout_marginTop="@dimen/padding_16"
+            android:text="@string/not_found_error_title" />
 
     </LinearLayout>
 
@@ -93,24 +127,25 @@
         android:layout_weight="1"
         android:gravity="top|center_horizontal"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:paddingTop="102dp">
+        android:paddingTop="102dp"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/connection_error_img"
             style="@style/SearchErrorImg"
-            android:src="@drawable/connection_error"
-            android:contentDescription="@string/connection_error_title" />
+            android:contentDescription="@string/connection_error_title"
+            android:src="@drawable/connection_error" />
 
         <TextView
             android:id="@+id/connection_error_title"
             style="@style/SearchErrorTitle"
-            android:text="@string/connection_error_title"/>
+            android:layout_marginTop="@dimen/padding_16"
+            android:text="@string/connection_error_title" />
 
         <Button
             android:id="@+id/retry_button"
             style="@style/SearchErrorButton"
-            android:text="@string/retry"/>
+            android:text="@string/retry" />
 
     </LinearLayout>
 </LinearLayout>

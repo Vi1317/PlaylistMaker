@@ -33,15 +33,11 @@ class SettingsActivity : AppCompatActivity() {
 
         val themeSwitch = findViewById<SwitchMaterial>(R.id.theme_switch)
 
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        themeSwitch.isChecked = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+        val app = application as App
+        themeSwitch.isChecked = app.darkTheme
 
-        themeSwitch.setOnCheckedChangeListener {buttonView, isChecked ->
-            if(isChecked){
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            }else{
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
+        themeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
+            app.switchTheme(isChecked)
         }
 
         val shareButton = findViewById<MaterialTextView>(R.id.share)
