@@ -7,8 +7,11 @@ import androidx.core.content.edit
 class App : Application() {
 
     var darkTheme = false
-    private val prefsName = "app_settings"
-    private val themeKey = "dark_theme"
+        private set
+    companion object {
+        private const val PREF_NAME = "app_settings"
+        private const val THEME_KEY = "dark_theme"
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -16,16 +19,16 @@ class App : Application() {
     }
 
     private fun loadTheme() {
-        val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
-        darkTheme = prefs.getBoolean(themeKey, false)
+        val prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+        darkTheme = prefs.getBoolean(THEME_KEY, false)
         applyTheme()
     }
 
     fun switchTheme(darkThemeEnabled: Boolean) {
         darkTheme = darkThemeEnabled
-        val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
+        val prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
         prefs.edit {
-            putBoolean(themeKey, darkThemeEnabled)
+            putBoolean(THEME_KEY, darkThemeEnabled)
         }
         applyTheme()
     }
