@@ -9,6 +9,6 @@
     <color name="blue_light">#9FBBF3</color>
     <color name="gray_btn_light">#C5C6C7</color>
     <color name="gray_btn_night">#535459</color>
-    <color name="search_clr">#E6E8EB</color>
-    <color name="play_btn">#1A1B22</color>
+    <color name="search_clr">#FFF</color>
+    <color name="play_btn">#FFFFFF</color>
 </resources>

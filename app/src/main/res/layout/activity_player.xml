@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="24dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="24dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/leftBorder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="16dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/rightBorder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="16dp" />
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/back"
+            style="@style/HeaderToolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_back_24" />
+
+        <ImageView
+            android:id="@+id/track_cover"
+            android:layout_width="312dp"
+            android:layout_height="312dp"
+            android:layout_marginTop="26dp"
+            android:contentDescription="@string/cover"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+            app:layout_constraintHeight_max="512dp"
+            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
+            app:layout_constraintTop_toBottomOf="@id/back"
+            app:layout_constraintWidth_max="512dp"
+            tools:src="@drawable/placeholder" />
+
+        <TextView
+            android:id="@+id/track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="26dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            app:layout_constraintEnd_toEndOf="@id/guidelineRight"
+            app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@id/track_cover"
+            tools:text="Smells Like Teen Spirit" />
+
+        <TextView
+            android:id="@+id/track_artist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@id/guidelineRight"
+            app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@id/track_title"
+            tools:text="Nirvana" />
+
+        <ImageButton
+            android:id="@+id/add"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_marginTop="54dp"
+            android:background="@drawable/circle"
+            android:contentDescription="@string/add_to_playlist"
+            android:scaleType="center"
+            android:src="@drawable/ic_add_23"
+            app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+            app:layout_constraintTop_toBottomOf="@id/track_artist" />
+
+        <ImageButton
+            android:id="@+id/play_btn"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="30dp"
+            android:contentDescription="@string/play"
+            android:scaleType="center"
+            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
+            app:layout_constraintTop_toBottomOf="@id/track_artist"
+            android:background="?attr/colorPrimary"
+            app:tint="@color/play_btn"
+            android:src="@drawable/ic_play_100" />
+
+        <ImageButton
+            android:id="@+id/like"
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            android:layout_marginTop="54dp"
+            android:background="@drawable/circle"
+            android:contentDescription="@string/add_to_favorite"
+            android:scaleType="center"
+            android:src="@drawable/ic_like_25"
+            app:layout_constraintEnd_toEndOf="@id/guidelineRight"
+            app:layout_constraintTop_toBottomOf="@id/track_artist" />
+
+        <TextView
+            android:id="@+id/play_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="0:30"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
+            app:layout_constraintTop_toBottomOf="@id/play_btn" />
+
+        <TextView
+            android:id="@+id/track_time_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="9dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:paddingTop="30dp"
+            android:text="@string/track_time"
+            android:textColor="?attr/colorOnSecondary"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toBottomOf="@id/play_time" />
+
+        <TextView
+            android:id="@+id/track_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="5:35"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/track_time_title"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder" />
+
+        <TextView
+            android:id="@+id/track_album_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="9dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/album"
+            android:textColor="@color/text_gray"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toBottomOf="@id/track_time_title"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/track_album"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="Smells Like Teen Spirit"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/track_album_title"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/track_year_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="9dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/year"
+            android:textColor="@color/text_gray"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toBottomOf="@id/track_album_title"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/track_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="1960"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/track_year_title"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/track_genre_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="9dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/genre"
+            android:textColor="@color/text_gray"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toBottomOf="@id/track_year_title" />
+
+        <TextView
+            android:id="@+id/track_genre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="Rock"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/track_genre_title"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder" />
+
+        <TextView
+            android:id="@+id/track_country_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="9dp"
+            android:fontFamily="@font/ys_display_medium"
+            android:text="@string/country"
+            android:textColor="@color/text_gray"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/leftBorder"
+            app:layout_constraintTop_toBottomOf="@id/track_genre_title" />
+
+        <TextView
+            android:id="@+id/track_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ys_display_medium"
+            tools:text="USA"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/track_country_title"
+            app:layout_constraintEnd_toEndOf="@id/rightBorder" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
