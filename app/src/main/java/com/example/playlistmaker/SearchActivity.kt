@@ -33,6 +33,8 @@ class SearchActivity : AppCompatActivity() {
     private val trackAdapter = TrackAdapter(tracks)
 
     private lateinit var searchHistory: SearchHistory
+    private val historyTracks = ArrayList<Track>()
+    private lateinit var historyAdapter: TrackAdapter
     private lateinit var sharedPreferences: SharedPreferences
 
     private lateinit var searchText: EditText
@@ -59,19 +61,28 @@ class SearchActivity : AppCompatActivity() {
 
         val backButton = findViewById<MaterialToolbar>(R.id.back)
         backButton.setNavigationOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            finish()
         }
 
         historyLayout = findViewById<LinearLayout>(R.id.history)
         clearHistoryButton = findViewById<Button>(R.id.clear_history_button)
         historyList = findViewById<RecyclerView>(R.id.history_list)
-        historyList.adapter = trackAdapter
+        historyAdapter = TrackAdapter(historyTracks)
+        historyList.adapter = historyAdapter
+        historyAdapter.onTrackClick = {
+            val intent = Intent(this, PlayerActivity::class.java)
+            intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
+            startActivity(intent)
+        }
 
         trackList = findViewById<RecyclerView>(R.id.track_list)
         trackList.adapter = trackAdapter
         trackAdapter.onTrackClick = {
             searchHistory.write(it)
+
+            val intent = Intent(this, PlayerActivity::class.java)
+            intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
+            startActivity(intent)
         }
 
         searchText = findViewById<EditText>(R.id.search_text)
@@ -156,19 +167,29 @@ class SearchActivity : AppCompatActivity() {
                         response: Response<TracksResponse?>
                     ) {
                         if (response.isSuccessful) {
-                            val searchResults = response.body()?.results
-
-                            if (!searchResults.isNullOrEmpty()) {
-                                tracks.clear()
-                                tracks.addAll(searchResults)
-                                trackAdapter.notifyDataSetChanged()
-                                showSearchResults()
-                            } else {
-                                tracks.clear()
-                                trackAdapter.notifyDataSetChanged()
+                            val searchResults = response.body()
+                            tracks.clear()
+                            searchResults?.results?.forEach { result ->
+                                tracks.add(
+                                    Track(
+                                        trackId = result.trackId,
+                                        trackName = result.trackName,
+                                        artistName = result.artistName,
+                                        trackTimeMillis = result.trackTimeMillis,
+                                        artworkUrl100 = result.artworkUrl100,
+                                        collectionName = result.collectionName,
+                                        releaseDate = result.releaseDate,
+                                        primaryGenreName = result.primaryGenreName,
+                                        country = result.country
+                                    )
+                                )
                             }
+                            trackAdapter.notifyDataSetChanged()
+
                             if (tracks.isEmpty()) {
                                 showNotFoundError()
+                            } else {
+                                showSearchResults()
                             }
                         }
                     }
@@ -186,13 +207,13 @@ class SearchActivity : AppCompatActivity() {
     private fun showHistory() {
         tracks.clear()
         val historyItems = searchHistory.read()
-        if(!historyItems.isEmpty()) {
+        if (!historyItems.isEmpty()) {
             notConnect.visibility = View.GONE
             notFound.visibility = View.GONE
             trackList.visibility = View.GONE
             historyLayout.visibility = View.VISIBLE
 
-            tracks.addAll(historyItems)
+            historyTracks.addAll(historyItems)
             trackAdapter.notifyDataSetChanged()
         } else {
             historyLayout.visibility = View.GONE
