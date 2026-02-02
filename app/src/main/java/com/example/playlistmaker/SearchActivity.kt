@@ -3,6 +3,8 @@ package com.example.playlistmaker
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -11,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.core.content.getSystemService
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.appbar.MaterialToolbar
@@ -29,6 +32,9 @@ class SearchActivity : AppCompatActivity() {
 
     private val iTunesService = retrofit.create(ITunesApi::class.java)
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var isClickAllowed = true
+
     private val tracks = ArrayList<Track>()
     private val trackAdapter = TrackAdapter(tracks)
 
@@ -40,6 +46,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var searchText: EditText
     private var currentText: String = ""
     private lateinit var clearButton: ImageView
+    private lateinit var progressBar: ProgressBar
     private lateinit var notFound: LinearLayout
     private lateinit var notConnect: LinearLayout
     private lateinit var retryButton: Button
@@ -70,24 +77,29 @@ class SearchActivity : AppCompatActivity() {
         historyAdapter = TrackAdapter(historyTracks)
         historyList.adapter = historyAdapter
         historyAdapter.onTrackClick = {
-            val intent = Intent(this, PlayerActivity::class.java)
-            intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
-            startActivity(intent)
+            if (clickDebounce()) {
+                val intent = Intent(this, PlayerActivity::class.java)
+                intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
+                startActivity(intent)
+            }
         }
 
         trackList = findViewById<RecyclerView>(R.id.track_list)
         trackList.adapter = trackAdapter
         trackAdapter.onTrackClick = {
-            searchHistory.write(it)
+            if (clickDebounce()) {
+                searchHistory.write(it)
 
-            val intent = Intent(this, PlayerActivity::class.java)
-            intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
-            startActivity(intent)
+                val intent = Intent(this, PlayerActivity::class.java)
+                intent.putExtra(PlayerActivity.EXTRA_TRACK, it)
+                startActivity(intent)
+            }
         }
 
         searchText = findViewById<EditText>(R.id.search_text)
         clearButton = findViewById<ImageView>(R.id.clear_search)
 
+        progressBar = findViewById<ProgressBar>(R.id.progressBar)
         notConnect = findViewById<LinearLayout>(R.id.connection_error)
         notFound = findViewById<LinearLayout>(R.id.not_found_error)
         retryButton = findViewById<Button>(R.id.retry_button)
@@ -106,7 +118,9 @@ class SearchActivity : AppCompatActivity() {
         searchText.addTextChangedListener { text ->
             clearButton.visibility = clearButtonVisibility(text)
             currentText = text?.toString() ?: ""
-            //trackList.visibility = View.VISIBLE
+
+            searchDebounce()
+
             if (currentText != "") {
                 historyLayout.visibility = View.GONE
             } else {
@@ -145,6 +159,24 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val SEARCH_TEXT = "search_text"
         private const val ITUNES_BASE_URL = "https://itunes.apple.com/"
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+    }
+
+    private val searchRunnable = Runnable { searchTracks() }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -160,6 +192,9 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchTracks() {
         if (searchText.text.isNotEmpty()) {
+            progressBar.visibility = View.VISIBLE
+            tracks.clear()
+
             iTunesService.search(searchText.text.toString())
                 .enqueue(object : Callback<TracksResponse> {
                     override fun onResponse(
@@ -180,7 +215,8 @@ class SearchActivity : AppCompatActivity() {
                                         collectionName = result.collectionName,
                                         releaseDate = result.releaseDate,
                                         primaryGenreName = result.primaryGenreName,
-                                        country = result.country
+                                        country = result.country,
+                                        previewUrl = result.previewUrl
                                     )
                                 )
                             }
@@ -189,12 +225,14 @@ class SearchActivity : AppCompatActivity() {
                             if (tracks.isEmpty()) {
                                 showNotFoundError()
                             } else {
+                                progressBar.visibility = View.GONE
                                 showSearchResults()
                             }
                         }
                     }
 
                     override fun onFailure(call: Call<TracksResponse?>, t: Throwable) {
+                        progressBar.visibility = View.GONE
                         tracks.clear()
                         trackAdapter.notifyDataSetChanged()
                         showConnectionError()
@@ -232,7 +270,6 @@ class SearchActivity : AppCompatActivity() {
         notFound.visibility = View.GONE
         historyLayout.visibility = View.GONE
         trackList.visibility = View.VISIBLE
-        closeKeyboard()
     }
 
     private fun showNotFoundError() {
