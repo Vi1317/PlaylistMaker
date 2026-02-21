@@ -1,22 +1,15 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.Toolbar
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.textview.MaterialTextView
 import androidx.core.net.toUri
+import com.example.playlistmaker.R
+import com.example.playlistmaker.domain.Creator
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textview.MaterialTextView
 
 class SettingsActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
@@ -27,24 +20,21 @@ class SettingsActivity : AppCompatActivity() {
 
         val backButton = findViewById<MaterialToolbar>(R.id.back)
         backButton.setNavigationOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            finish()
         }
 
         val themeSwitch = findViewById<SwitchMaterial>(R.id.theme_switch)
-
-        val app = application as App
-        themeSwitch.isChecked = app.darkTheme
-
+        val settingsInteractor = Creator.provideSettingsInteractor(this)
+        themeSwitch.isChecked = settingsInteractor.isDarkTheme()
         themeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            app.switchTheme(isChecked)
+            settingsInteractor.switchTheme(isChecked)
         }
 
         val shareButton = findViewById<MaterialTextView>(R.id.share)
         shareButton.setOnClickListener {
             val shareIntent: Intent = Intent(Intent.ACTION_SEND).apply {
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
                 type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
             }
             startActivity(Intent.createChooser(shareIntent, getString(R.string.share)))
         }
