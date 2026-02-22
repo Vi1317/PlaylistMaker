@@ -1,11 +1,12 @@
-package com.example.playlistmaker
+package com.example.playlistmaker.data.dto
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.example.playlistmaker.domain.models.Track
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class SearchHistory(val sharedPreferences: SharedPreferences) {
+class SearchHistoryManager(val sharedPreferences: SharedPreferences) {
     private val historyKey = "search_history"
     private val gson = Gson()
 
@@ -13,24 +14,25 @@ class SearchHistory(val sharedPreferences: SharedPreferences) {
         private const val LIST_SIZE = 10
     }
 
-    fun read(): List<Track> {
+    fun readHistory(): List<Track> {
         val json = sharedPreferences.getString(historyKey, null) ?: return emptyList<Track>()
-        val type = object : TypeToken<ArrayList<Track>>() {}.type
-        return gson.fromJson(json, type)
+        val type = object : TypeToken<ArrayList<TrackEntity>>() {}.type
+        val entities: List<TrackEntity> = gson.fromJson(json, type)
+        return entities.map { it.toDomain() }
     }
 
-    fun write(track: Track) {
+    fun addToHistory(track: Track) {
         val json = sharedPreferences.getString(historyKey, null)
-        val historyList: MutableList<Track>
+        val historyList: MutableList<TrackEntity>
         if (json == null) {
             historyList = mutableListOf()
         } else {
-            val type = object : TypeToken<ArrayList<Track>>() {}.type
+            val type = object : TypeToken<ArrayList<TrackEntity>>() {}.type
             historyList = gson.fromJson(json, type)
         }
-
-        historyList.removeIf { it.trackId == track.trackId }
-        historyList.add(0, track)
+        val trackEntity = track.toEntity()
+        historyList.removeIf { it.trackId == trackEntity.trackId }
+        historyList.add(0, trackEntity)
 
         sharedPreferences.edit {
             putString(historyKey, gson.toJson(historyList.take(LIST_SIZE)))
@@ -38,7 +40,7 @@ class SearchHistory(val sharedPreferences: SharedPreferences) {
         }
     }
 
-    fun clear() {
+    fun clearHistory() {
         sharedPreferences.edit {
             remove(historyKey)
             .apply()
