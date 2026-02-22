@@ -2,7 +2,6 @@ package com.example.playlistmaker.domain.impl
 
 import android.os.Handler
 import android.os.Looper
-import com.example.playlistmaker.data.dto.PlayerManager
 import com.example.playlistmaker.domain.api.PlayerInteractor
 import com.example.playlistmaker.domain.api.PlayerRepository
 import kotlinx.coroutines.Runnable
@@ -12,7 +11,6 @@ class PlayerInteractorImpl(private val playerRepository: PlayerRepository) : Pla
         private const val UPDATE_DEBOUNCE_DELAY = 300L
     }
 
-    private val playerManager = PlayerManager()
     private val handler = Handler(Looper.getMainLooper())
 
     override var state = PlayerInteractor.STATE_DEFAULT

@@ -21,6 +21,7 @@ import com.example.playlistmaker.data.SearchHistoryRepositoryImpl
 import com.example.playlistmaker.data.TracksRepositoryImpl
 import com.example.playlistmaker.data.dto.SearchHistoryManager
 import com.example.playlistmaker.data.network.RetrofitNetworkClient
+import com.example.playlistmaker.domain.Creator
 import com.example.playlistmaker.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.domain.api.TracksInteractor
 import com.example.playlistmaker.domain.impl.SearchHistoryInteractorImpl
@@ -69,15 +70,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun initDependencies() {
-        val sharedPreferences = getSharedPreferences("app_preferences", MODE_PRIVATE)
-
-        val searchHistoryManager = SearchHistoryManager(sharedPreferences)
-        val searchHistoryRepository = SearchHistoryRepositoryImpl(searchHistoryManager)
-        searchHistoryInteractor = SearchHistoryInteractorImpl(searchHistoryRepository)
-
-        val networkClient = RetrofitNetworkClient()
-        val tracksRepository = TracksRepositoryImpl(networkClient)
-        tracksInteractor = TracksInteractorImpl(tracksRepository)
+        tracksInteractor = Creator.provideTracksInteractor()
+        searchHistoryInteractor = Creator.provideSearchHistoryInteractor(this)
     }
 
     private fun initViews() {

@@ -188,14 +188,18 @@
 
         <TextView
             android:id="@+id/track_album"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/ys_display_medium"
             tools:text="Smells Like Teen Spirit"
             android:textColor="?attr/colorOnPrimary"
             android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:paddingStart="@dimen/padding_12"
             app:layout_constraintBaseline_toBaselineOf="@+id/track_album_title"
             app:layout_constraintEnd_toEndOf="@id/rightBorder"
+            app:layout_constraintStart_toEndOf="@+id/track_album_title"
             android:visibility="gone"/>
 
         <TextView

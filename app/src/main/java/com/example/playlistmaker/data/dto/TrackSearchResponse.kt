@@ -4,8 +4,7 @@ import com.example.playlistmaker.domain.models.Track
 
 data class TrackSearchResponse (val searchType: String,
                            val expression: String,
-                           val results: List<TrackDto>) : Response() {
-}
+                           val results: List<TrackDto>) : Response()
 
 fun TrackDto.toTrack(): Track {
     return Track(
@@ -15,7 +14,7 @@ fun TrackDto.toTrack(): Track {
         trackTimeMillis = trackTimeMillis,
         artworkUrl100 = artworkUrl100,
         collectionName = collectionName,
-        releaseDate = releaseDate ?: "",
+        releaseDate = releaseDate,
         primaryGenreName = primaryGenreName,
         country = country,
         previewUrl = previewUrl

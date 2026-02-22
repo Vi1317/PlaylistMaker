@@ -1,36 +1,68 @@
 package com.example.playlistmaker.data
 
-import com.example.playlistmaker.data.dto.PlayerManager
+import android.media.MediaPlayer
 import com.example.playlistmaker.domain.api.PlayerRepository
+import java.io.IOException
 
-class PlayerRepositoryImpl (private val playerManager: PlayerManager) : PlayerRepository {
+class PlayerRepositoryImpl () : PlayerRepository {
+    private var mediaPlayer = MediaPlayer()
+    private var preparedListener: (() -> Unit)? = null
+    private var completionListener: (() -> Unit)? = null
+    private var errorListener: (() -> Unit)? = null
+
     override fun prepare(url: String?) {
-        playerManager.prepare(url)
+        try {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.stop()
+            }
+            mediaPlayer.reset()
+
+            mediaPlayer.setDataSource(url)
+            mediaPlayer.prepareAsync()
+            mediaPlayer.setOnPreparedListener {
+                preparedListener?.invoke()
+            }
+            mediaPlayer.setOnCompletionListener {
+                completionListener?.invoke()
+            }
+            mediaPlayer.setOnErrorListener { _, _, _ ->
+                errorListener?.invoke()
+                true
+            }
+        } catch (e: IOException) {
+            errorListener?.invoke()
+        }
     }
+
     override fun start() {
-        playerManager.start()
+        mediaPlayer.start()
     }
+
     override fun pause() {
-        playerManager.pause()
+        mediaPlayer.pause()
     }
+
     override fun release() {
-        playerManager.release()
+        mediaPlayer.release()
     }
+
     override fun isPlaying() : Boolean {
-        return playerManager.isPlaying()
+        return mediaPlayer.isPlaying
     }
-    override fun getCurrentPosition() : Int{
-        return playerManager.getCurrentPosition()
+
+    override fun getCurrentPosition() : Int {
+        return mediaPlayer.currentPosition
     }
+
     override fun setOnPreparedListener(listener: () -> Unit) {
-        playerManager.onPreparedListener = listener
+        preparedListener = listener
     }
 
     override fun setOnCompletionListener(listener: () -> Unit) {
-        playerManager.onCompletionListener = listener
+        completionListener = listener
     }
 
     override fun setOnErrorListener(listener: () -> Unit) {
-        playerManager.onErrorListener = listener
+        errorListener = listener
     }
 }

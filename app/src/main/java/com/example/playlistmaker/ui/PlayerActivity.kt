@@ -1,6 +1,5 @@
 package com.example.playlistmaker.ui
 
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,10 +11,8 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.data.PlayerRepositoryImpl
-import com.example.playlistmaker.data.dto.PlayerManager
+import com.example.playlistmaker.domain.Creator
 import com.example.playlistmaker.domain.api.PlayerInteractor
-import com.example.playlistmaker.domain.impl.PlayerInteractorImpl
 import com.example.playlistmaker.domain.models.Track
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.SimpleDateFormat
@@ -33,7 +30,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var likeButton: ImageButton
 
     private lateinit var url: String
-    private lateinit var mediaPlayer: MediaPlayer
     private lateinit var playTime: TextView
     private lateinit var trackTimeMillis: TextView
 
@@ -41,9 +37,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
-        val playerManager = PlayerManager()
-        val playerRepository = PlayerRepositoryImpl(playerManager)
-        playerInteractor = PlayerInteractorImpl(playerRepository)
+        playerInteractor = Creator.providePlayerInteractor()
 
         val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra(EXTRA_TRACK, Track::class.java)
@@ -98,7 +92,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val yearTitle = findViewById<TextView>(R.id.track_year_title)
-        if (track.releaseDate.trim().isEmpty()) {
+        if (track.releaseDate.isNullOrEmpty()) {
             year.visibility = View.GONE
             yearTitle.visibility = View.GONE
         } else {

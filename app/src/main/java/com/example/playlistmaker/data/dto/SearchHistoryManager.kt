@@ -16,22 +16,23 @@ class SearchHistoryManager(val sharedPreferences: SharedPreferences) {
 
     fun readHistory(): List<Track> {
         val json = sharedPreferences.getString(historyKey, null) ?: return emptyList<Track>()
-        val type = object : TypeToken<ArrayList<Track>>() {}.type
-        return gson.fromJson(json, type)
+        val type = object : TypeToken<ArrayList<TrackEntity>>() {}.type
+        val entities: List<TrackEntity> = gson.fromJson(json, type)
+        return entities.map { it.toDomain() }
     }
 
     fun addToHistory(track: Track) {
         val json = sharedPreferences.getString(historyKey, null)
-        val historyList: MutableList<Track>
+        val historyList: MutableList<TrackEntity>
         if (json == null) {
             historyList = mutableListOf()
         } else {
-            val type = object : TypeToken<ArrayList<Track>>() {}.type
+            val type = object : TypeToken<ArrayList<TrackEntity>>() {}.type
             historyList = gson.fromJson(json, type)
         }
-
-        historyList.removeIf { it.trackId == track.trackId }
-        historyList.add(0, track)
+        val trackEntity = track.toEntity()
+        historyList.removeIf { it.trackId == trackEntity.trackId }
+        historyList.add(0, trackEntity)
 
         sharedPreferences.edit {
             putString(historyKey, gson.toJson(historyList.take(LIST_SIZE)))
