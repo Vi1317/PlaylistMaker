@@ -197,6 +197,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:paddingStart="@dimen/padding_12"
+            android:gravity="end"
             app:layout_constraintBaseline_toBaselineOf="@+id/track_album_title"
             app:layout_constraintEnd_toEndOf="@id/rightBorder"
             app:layout_constraintStart_toEndOf="@+id/track_album_title"
