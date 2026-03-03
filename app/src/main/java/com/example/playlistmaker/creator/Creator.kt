@@ -19,11 +19,12 @@ import com.example.playlistmaker.sharing.domain.SharingInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
 import com.example.playlistmaker.search.domain.api.TracksRepository
 import com.example.playlistmaker.player.domain.PlayerInteractorImpl
+import com.example.playlistmaker.search.data.dto.TrackEntity
 import com.example.playlistmaker.search.domain.impl.SearchHistoryInteractorImpl
 import com.example.playlistmaker.settings.domain.SettingsInteractorImpl
 import com.example.playlistmaker.sharing.domain.SharingInteractorImpl
 import com.example.playlistmaker.search.domain.impl.TracksInteractorImpl
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.domain.Track
 import com.google.gson.reflect.TypeToken
 
 object Creator {
@@ -56,13 +57,13 @@ object Creator {
     }
 
     private fun getSearchHistoryRepository(context: Context): SearchHistoryRepository {
-        return SearchHistoryRepositoryImpl(
-            PrefsStorageClient<ArrayList<Track>>(
-                context,
-                "HISTORY",
-                object : TypeToken<ArrayList<Track>>() {}.type
-            )
+        val type = object : TypeToken<ArrayList<TrackEntity>>() {}.type
+        val storage = PrefsStorageClient<ArrayList<TrackEntity>>(
+            context,
+            "search_history",
+            type
         )
+        return SearchHistoryRepositoryImpl(storage)
     }
 
     fun provideSearchHistoryInteractor(context: Context): SearchHistoryInteractor {
@@ -76,6 +77,4 @@ object Creator {
     fun providePlayerInteractor(): PlayerInteractor {
         return PlayerInteractorImpl(getPlayerRepository())
     }
-
-    const val PM_PREFERENCES = "playlistmaker"
 }

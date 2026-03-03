@@ -17,8 +17,7 @@ import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.viewmodel.SearchState
 import com.example.playlistmaker.search.viewmodel.SearchViewModel
 import com.example.playlistmaker.search.viewmodel.SearchViewModelFactory
-import com.example.playlistmaker.search.data.dto.Track
-import com.example.playlistmaker.search.data.dto.TrackAdapter
+import com.example.playlistmaker.search.domain.Track
 
 class SearchActivity : AppCompatActivity() {
 

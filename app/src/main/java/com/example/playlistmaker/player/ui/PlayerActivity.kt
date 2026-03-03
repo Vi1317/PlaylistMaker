@@ -1,10 +1,8 @@
 package com.example.playlistmaker.player.ui
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -12,7 +10,8 @@ import com.example.playlistmaker.R
 import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
 import com.example.playlistmaker.player.viewmodel.PlayerViewModel
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.domain.Track
+import com.example.playlistmaker.util.getSerializableExtraCompat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -29,12 +28,7 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra(EXTRA_TRACK, Track::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getSerializableExtra(EXTRA_TRACK) as? Track
-        }
+        val track = intent.getSerializableExtraCompat<Track>(EXTRA_TRACK)
 
         if (track == null) {
             finish()
@@ -50,7 +44,7 @@ class PlayerActivity : AppCompatActivity() {
         val playerInteractor = Creator.providePlayerInteractor()
         viewModel = ViewModelProvider(
             this,
-            PlayerViewModel.Companion.getFactory(playerInteractor, track)
+            PlayerViewModel.getFactory(playerInteractor, track)
         )[PlayerViewModel::class.java]
     }
 
@@ -118,41 +112,15 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.playerState.observe(this) { state ->
-            when (state) {
-                PlayerViewModel.Companion.STATE_PREPARED -> {
-                    binding.playBtn.isEnabled = true
-                    binding.playBtn.setImageResource(R.drawable.ic_play_100)
-                    binding.playBtn.setColorFilter(ContextCompat.getColor(this, R.color.play_btn))
-                    binding.playTime.text = "00:00"
-                }
-                PlayerViewModel.Companion.STATE_PLAYING -> {
-                    binding.playBtn.setImageResource(R.drawable.ic_pause_100)
-                    binding.playBtn.setColorFilter(ContextCompat.getColor(this, R.color.play_btn))
-                }
-                PlayerViewModel.Companion.STATE_PAUSED -> {
-                    binding.playBtn.setImageResource(R.drawable.ic_play_100)
-                    binding.playBtn.setColorFilter(ContextCompat.getColor(this, R.color.play_btn))
-                }
-                PlayerViewModel.Companion.STATE_COMPLETED -> {
-                    binding.playBtn.setImageResource(R.drawable.ic_play_100)
-                    binding.playBtn.setColorFilter(ContextCompat.getColor(this, R.color.play_btn))
-                    binding.playTime.text = "00:00"
-                }
-            }
-        }
-
-        viewModel.progressTime.observe(this) { time ->
-            binding.playTime.text = time
+        viewModel.state.observe(this) { state ->
+            binding.playBtn.isEnabled = state.isPlayButtonEnabled
+            binding.playBtn.setImageResource(
+                if (state.isPlaying) R.drawable.ic_pause_100
+                else R.drawable.ic_play_100
+            )
+            binding.playTime.text = state.currentTime
         }
     }
 
     private fun Track.getCoverArtwork() = artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
-
-    override fun onPause() {
-        super.onPause()
-        if (viewModel.playerState.value == PlayerViewModel.Companion.STATE_PLAYING) {
-            viewModel.onPlayButtonClicked()
-        }
-    }
 }

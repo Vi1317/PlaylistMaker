@@ -1,7 +1,6 @@
 package com.example.playlistmaker.search.domain.api
 
-import com.example.playlistmaker.search.data.dto.Resource
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.domain.Track
 
 interface SearchHistoryInteractor {
     fun getHistory(consumer: HistoryConsumer)
@@ -9,6 +8,6 @@ interface SearchHistoryInteractor {
     fun addToHistory(track: Track)
 
     interface HistoryConsumer {
-        fun consume(history: Resource<List<Track>>)
+        fun consume(history: Result<List<Track>>)
     }
 }

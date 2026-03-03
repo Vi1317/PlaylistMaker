@@ -1,15 +1,18 @@
 package com.example.playlistmaker.search.data
 
-import com.example.playlistmaker.search.data.dto.Resource
 import com.example.playlistmaker.search.data.dto.StorageClient
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.data.dto.TrackEntity
+import com.example.playlistmaker.search.data.dto.toDomain
+import com.example.playlistmaker.search.data.dto.toEntity
+import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.domain.api.SearchHistoryRepository
 
-class SearchHistoryRepositoryImpl (private val storage: StorageClient<ArrayList<Track>>) :
+class SearchHistoryRepositoryImpl (private val storage: StorageClient<ArrayList<TrackEntity>>) :
     SearchHistoryRepository {
-        override fun getHistory(): Resource<List<Track>> {
-            val track = storage.getData() ?: listOf()
-            return Resource.Success(track)
+        override fun getHistory(): Result<List<Track>> {
+                val entities = storage.getData() ?: arrayListOf()
+                val track = entities.map { it.toDomain() }
+                return Result.success(track)
         }
 
         override fun clearHistory() {
@@ -17,18 +20,19 @@ class SearchHistoryRepositoryImpl (private val storage: StorageClient<ArrayList<
         }
 
         override fun addToHistory(track: Track) {
-            val currentHistory = storage.getData() ?: arrayListOf()
 
-            currentHistory.removeAll { it.trackId == track.trackId }
+            val entities = storage.getData() ?: arrayListOf()
+            val entity = track.toEntity()
 
-            currentHistory.add(0, track)
+            entities.removeAll { it.trackId == entity.trackId }
+            entities.add(0, entity)
 
-            val updatedHistory = if (currentHistory.size > 10) {
-                currentHistory.subList(0, 10)
+            val updatedHistory = if (entities.size > 10) {
+                ArrayList(entities.subList(0, 10))
             } else {
-                currentHistory
+                entities
             }
 
-            storage.storeData(ArrayList(updatedHistory))
+            storage.storeData(updatedHistory)
         }
 }

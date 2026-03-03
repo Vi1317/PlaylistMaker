@@ -6,8 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.search.data.dto.Resource
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
 
@@ -29,26 +28,23 @@ class SearchViewModel(
 
     private fun loadHistory() {
         searchHistoryInteractor.getHistory(object : SearchHistoryInteractor.HistoryConsumer {
-            override fun consume(history: Resource<List<Track>>) {
-                when (history) {
-                    is Resource.Success -> {
-                        val tracks = history.data ?: emptyList()
-                        _state.postValue (_state.value?.copy(
+            override fun consume(history: Result<List<Track>>) {
+                history.fold(
+                    onSuccess = { tracks ->
+                        _state.postValue(_state.value?.copy(
                             showHistory = true,
                             historyTracks = tracks,
                             historyEmpty = tracks.isEmpty()
                         ))
-                    }
-                    is Resource.Error -> {
-                        _state.postValue (_state.value?.copy(
+                    },
+                    onFailure = { exception ->
+                        _state.postValue(_state.value?.copy(
                             showHistory = true,
                             historyTracks = emptyList(),
                             historyEmpty = true
                         ))
                     }
-                    is Resource.Loading -> {
-                    }
-                }
+                )
             }
         })
     }

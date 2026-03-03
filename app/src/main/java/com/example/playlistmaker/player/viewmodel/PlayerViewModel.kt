@@ -1,11 +1,13 @@
 package com.example.playlistmaker.player.viewmodel
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.playlistmaker.player.domain.PlayerInteractor
-import com.example.playlistmaker.search.data.dto.Track
+import com.example.playlistmaker.search.domain.Track
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -15,11 +17,7 @@ class PlayerViewModel(
 ) : ViewModel() {
 
     companion object {
-        const val STATE_DEFAULT = 0
-        const val STATE_PREPARED = 1
-        const val STATE_PLAYING = 2
-        const val STATE_PAUSED = 3
-        const val STATE_COMPLETED = 4
+        private const val UPDATE_DELAY = 300L
 
         fun getFactory(playerInteractor: PlayerInteractor, track: Track): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
@@ -31,34 +29,87 @@ class PlayerViewModel(
         }
     }
 
-    private val _playerState = MutableLiveData(STATE_DEFAULT)
-    val playerState: LiveData<Int> = _playerState
+    private val handler = Handler(Looper.getMainLooper())
+    private var isPlaying = false
 
-    private val _progressTime = MutableLiveData("00:00")
-    val progressTime: LiveData<String> = _progressTime
+    private val _state = MutableLiveData(
+        PlayerState(
+            isPlayButtonEnabled = false,
+            isPlaying = false,
+            currentTime = "00:00"
+        )
+    )
+    val state: LiveData<PlayerState> = _state
 
     init {
-        playerInteractor.onStateChanged = { newState ->
-            _playerState.postValue(newState)
+        playerInteractor.setOnPreparedListener {
+            _state.postValue(
+                PlayerState(
+                    isPlayButtonEnabled = true,
+                    isPlaying = false,
+                    currentTime = "00:00"
+                )
+            )
         }
-
-        playerInteractor.onPositionChanged = { position ->
-            val time = SimpleDateFormat("mm:ss", Locale.getDefault()).format(position)
-            _progressTime.postValue(time)
+        playerInteractor.setOnCompletionListener {
+            isPlaying = false
+            _state.postValue(
+                PlayerState(
+                    isPlayButtonEnabled = true,
+                    isPlaying = false,
+                    currentTime = "00:00"
+                )
+            )
         }
 
         playerInteractor.prepare(track.previewUrl)
     }
 
     fun onPlayButtonClicked() {
-        when (_playerState.value) {
-            STATE_PLAYING -> playerInteractor.pause()
-            STATE_PREPARED, STATE_PAUSED -> playerInteractor.start()
+        if (isPlaying) {
+            stopTimer()
+        } else {
+            startTimer()
         }
+    }
+
+    private fun startTimer() {
+        playerInteractor.start()
+        isPlaying = true
+        updateTime()
+        _state.postValue(_state.value?.copy(isPlaying = true))
+    }
+
+    private fun stopTimer() {
+        playerInteractor.pause()
+        isPlaying = false
+        _state.postValue(_state.value?.copy(isPlaying = false))
+    }
+    private fun updateTime() {
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                if (isPlaying) {
+                    val time = formatTime(playerInteractor.getCurrentPosition())
+                    _state.postValue(_state.value?.copy(currentTime = time))
+                    handler.postDelayed(this, UPDATE_DELAY)
+                }
+            }
+        }, UPDATE_DELAY)
+    }
+
+
+    private fun formatTime(millis: Int): String {
+        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
     }
 
     override fun onCleared() {
         super.onCleared()
+        handler.removeCallbacksAndMessages(null)
         playerInteractor.release()
     }
 }
+data class PlayerState(
+    val isPlayButtonEnabled: Boolean,
+    val isPlaying: Boolean,
+    val currentTime: String
+)
