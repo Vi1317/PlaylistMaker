@@ -55,6 +55,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.koin.android.v330)
     implementation(libs.glide)
     implementation(libs.gson)
     implementation(libs.retrofit)
