@@ -10,18 +10,16 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.ViewModelProvider
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivitySearchBinding
 import com.example.playlistmaker.player.ui.PlayerActivity
 import com.example.playlistmaker.search.viewmodel.SearchState
 import com.example.playlistmaker.search.viewmodel.SearchViewModel
-import com.example.playlistmaker.search.viewmodel.SearchViewModelFactory
 import com.example.playlistmaker.search.domain.Track
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModel()
     private lateinit var binding: ActivitySearchBinding
 
     private val handler = Handler(Looper.getMainLooper())
@@ -40,18 +38,9 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initViewModel()
         initViews()
         setupClickListeners()
         observeViewModel()
-    }
-
-    private fun initViewModel() {
-        val tracksInteractor = Creator.provideTracksInteractor()
-        val searchHistoryInteractor = Creator.provideSearchHistoryInteractor(this)
-
-        val factory = SearchViewModelFactory(tracksInteractor, searchHistoryInteractor)
-        viewModel = ViewModelProvider(this, factory)[SearchViewModel::class.java]
     }
 
     private fun initViews() {

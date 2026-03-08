@@ -4,8 +4,7 @@ import android.media.MediaPlayer
 import com.example.playlistmaker.player.domain.PlayerRepository
 import java.io.IOException
 
-class PlayerRepositoryImpl () : PlayerRepository {
-    private var mediaPlayer = MediaPlayer()
+class PlayerRepositoryImpl (private val mediaPlayer: MediaPlayer) : PlayerRepository {
     private var preparedListener: (() -> Unit)? = null
     private var completionListener: (() -> Unit)? = null
     private var errorListener: (() -> Unit)? = null
