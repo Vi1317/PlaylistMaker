@@ -3,24 +3,29 @@ package com.example.playlistmaker.player.ui
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.creator.Creator
 import com.example.playlistmaker.databinding.ActivityPlayerBinding
 import com.example.playlistmaker.player.viewmodel.PlayerViewModel
 import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.util.getSerializableExtraCompat
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.getValue
 
 class PlayerActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_TRACK = "track"
     }
+    private val track by lazy {
+        intent.getSerializableExtraCompat<Track>(EXTRA_TRACK)
+            ?: throw IllegalArgumentException("Трек не найден")
+    }
+    private val viewModel: PlayerViewModel by viewModel { parametersOf(track) }
 
-    private lateinit var viewModel: PlayerViewModel
     private lateinit var binding: ActivityPlayerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,24 +33,8 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val track = intent.getSerializableExtraCompat<Track>(EXTRA_TRACK)
-
-        if (track == null) {
-            finish()
-            return
-        }
-
-        initViewModel(track)
         initViews(track)
         observeViewModel()
-    }
-
-    private fun initViewModel(track: Track) {
-        val playerInteractor = Creator.providePlayerInteractor()
-        viewModel = ViewModelProvider(
-            this,
-            PlayerViewModel.getFactory(playerInteractor, track)
-        )[PlayerViewModel::class.java]
     }
 
     private fun initViews(track: Track) {
