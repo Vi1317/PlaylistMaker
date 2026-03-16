@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.material.v180)
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 }
