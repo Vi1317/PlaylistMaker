@@ -34,6 +34,13 @@
     <string name="country">Страна</string>
 
     <string name="add_to_playlist">Добавить в плейлист</string>
+    <string name="new_playlist">Новый плейлист</string>
+    <string name="not_found_playlist">Вы не создали \n ни одного плейлиста</string>
+    <string name="favorite">Избранные треки</string>
+
     <string name="add_to_favorite">Добавить в избранное</string>
+    <string name="not_found_media">Ваша медиатека пуста</string>
+    <string name="playlist">Плейлисты</string>
+
     <string name="play">Воспроизвести</string>
 </resources>

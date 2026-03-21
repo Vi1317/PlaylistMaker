@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
+    android:fillViewport="true"
+    android:id="@+id/fragment_favorite">
+
+    <LinearLayout
+        android:id="@+id/not_found_error"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="top|center_horizontal"
+        android:orientation="vertical">
+
+    <ImageView
+            android:id="@+id/not_found_img"
+            style="@style/SearchErrorImg"
+            android:layout_marginTop="106dp"
+            android:contentDescription="@string/not_found_media"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
+            android:src="@drawable/not_found_error" />
+
+        <TextView
+            android:id="@+id/not_found_title"
+            style="@style/SearchErrorTitle"
+            android:layout_marginTop="@dimen/padding_16"
+            app:layout_constraintTop_toBottomOf="@id/not_found_img"
+            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
+            android:text="@string/not_found_media" />
+    </LinearLayout>
+</ScrollView>
