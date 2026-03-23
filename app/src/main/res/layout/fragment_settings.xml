@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorPrimary"
     android:orientation="vertical"
-    android:paddingHorizontal="@dimen/padding_16">
+    android:paddingHorizontal="@dimen/padding_16"
+    tools:context="com.example.playlistmaker.settings.ui.SettingsFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/back"
-        style="@style/HeaderToolbar"
-        app:navigationIcon="@drawable/ic_back_24"
-        app:title="@string/settings">
-    </com.google.android.material.appbar.MaterialToolbar>
+    <TextView
+        android:id="@+id/header"
+        style="@style/Header"
+        android:text="@string/settings">
+    </TextView>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/theme_switch"
