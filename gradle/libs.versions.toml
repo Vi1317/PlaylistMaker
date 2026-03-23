@@ -2,7 +2,9 @@
 activityKtx = "1.12.4"
 agp = "8.12.3"
 coreKtxVersion = "1.16.0"
+fragmentKtx = "1.8.9"
 glide = "5.0.5"
+googleMaterial = "1.13.0"
 gson = "2.13.2"
 koinAndroid = "4.1.1"
 koinAndroidVersion = "3.3.0"
@@ -17,6 +19,7 @@ material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
 materialVersion = "1.8.0"
+navigationFragmentKtx = "2.9.7"
 retrofit = "3.0.0"
 material3 = "1.4.0"
 
@@ -24,7 +27,10 @@ material3 = "1.4.0"
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-ktx-v1160 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -37,6 +43,7 @@ koin-android-v330 = { module = "io.insert-koin:koin-android", version.ref = "koi
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+material-v1130 = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
 material-v180 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
