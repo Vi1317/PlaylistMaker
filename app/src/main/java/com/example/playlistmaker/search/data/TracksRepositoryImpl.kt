@@ -5,27 +5,23 @@ import com.example.playlistmaker.search.data.dto.TrackSearchRequest
 import com.example.playlistmaker.search.data.dto.TrackSearchResponse
 import com.example.playlistmaker.search.domain.api.TracksRepository
 import com.example.playlistmaker.search.data.dto.toTrack
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class TracksRepositoryImpl (private val networkClient: NetworkClient) : TracksRepository {
 
-    override fun searchTracks(expression: String): Result<List<Track>> {
-        return try {
-            val response = networkClient.doRequest(TrackSearchRequest(expression))
+    override fun searchTracks(expression: String): Flow<Result<List<Track>>> = flow {
+        val response = networkClient.doRequest(TrackSearchRequest(expression))
 
-            if (response.resultCode == 200) {
-                if (response is TrackSearchResponse) {
-                    val tracks = response.results.map { trackDto ->
-                        trackDto.toTrack()
-                    }
-                    Result.success(tracks)
-                } else {
-                    Result.failure(Exception("Неверный формат ответа"))
+        if (response.resultCode == 200) {
+            with(response as TrackSearchResponse) {
+                val tracks = response.results.map { trackDto ->
+                    trackDto.toTrack()
                 }
-            } else {
-                Result.failure(Exception("Ошибка сервера: ${response.resultCode}"))
+                emit(Result.success(tracks))
             }
-        } catch (e: Exception) {
-            Result.failure(e)
+        } else {
+            emit(Result.failure(Exception("Ошибка сервера: ${response.resultCode}")))
         }
     }
 }

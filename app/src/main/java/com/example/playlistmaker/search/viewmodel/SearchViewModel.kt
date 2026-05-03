@@ -1,13 +1,15 @@
 package com.example.playlistmaker.search.viewmodel
 
-import android.os.Handler
-import android.os.Looper
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
@@ -18,8 +20,7 @@ class SearchViewModel(
 
     val state: LiveData<SearchState> = _state
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
+    private var searchJob: Job? = null
 
     init {
         loadHistory()
@@ -54,41 +55,52 @@ class SearchViewModel(
             return
         }
 
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            searchRequest(query)
+        }
+    }
+
+    private suspend fun searchRequest(query: String) {
         _state.value = _state.value?.copy(
             isLoading = true,
             showHistory = false
         )
 
-        searchRunnable?.let { handler.removeCallbacks(it) }
-        searchRunnable = Runnable {
-            searchTracks(query)
+        tracksInteractor.searchTracks(query).collect { pair ->
+            processResult(pair.first, pair.second)
         }
-        handler.postDelayed(searchRunnable!!, SEARCH_DEBOUNCE_DELAY)
     }
 
-    private fun searchTracks(query: String) {
-        tracksInteractor.searchTracks(query, object : TracksInteractor.TracksConsumer {
-            override fun consume(result: Result<List<Track>>) {
-                result.fold(
-                    onSuccess = { tracks ->
-                        _state.postValue (_state.value?.copy(
-                            isLoading = false,
-                            tracks = tracks,
-                            isEmpty = tracks.isEmpty(),
-                            isError = false
-                        ))
-                    },
-                    onFailure = {
-                        _state.postValue (_state.value?.copy(
-                            isLoading = false,
-                            isError = true,
-                            isEmpty = false,
-                            tracks = emptyList()
-                        ))
-                    }
+    private fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
+        when {
+            errorMessage != null -> {
+                _state.value = _state.value?.copy(
+                    isLoading = false,
+                    isError = true,
+                    isEmpty = false,
+                    tracks = emptyList()
                 )
             }
-        })
+            foundTracks.isNullOrEmpty() -> {
+                _state.value = _state.value?.copy(
+                    isLoading = false,
+                    isError = false,
+                    isEmpty = true,
+                    tracks = emptyList()
+                )
+            }
+            else -> {
+                _state.value = _state.value?.copy(
+                    isLoading = false,
+                    isError = false,
+                    isEmpty = false,
+                    tracks = foundTracks
+                )
+            }
+        }
     }
 
     fun addToHistory(track: Track) {

@@ -69,4 +69,6 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     implementation(libs.material.v1130)
+
+    implementation(libs.kotlinx.coroutines.android)
 }
