@@ -1,53 +1,68 @@
 package com.example.playlistmaker.player.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.ActivityPlayerBinding
+import com.example.playlistmaker.databinding.FragmentPlayerBinding
 import com.example.playlistmaker.player.viewmodel.PlayerViewModel
 import com.example.playlistmaker.search.domain.Track
-import com.example.playlistmaker.util.getSerializableExtraCompat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.getValue
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerFragment : Fragment() {
     companion object {
+        const val TAG = "PlayerFragment"
         const val EXTRA_TRACK = "track"
+        fun createArgs(track: Track): Bundle {
+            return Bundle().apply {
+                putSerializable(EXTRA_TRACK, track)
+            }
+        }
     }
-    private val track by lazy {
-        intent.getSerializableExtraCompat<Track>(EXTRA_TRACK)
-            ?: throw IllegalArgumentException("Трек не найден")
+    private val track: Track by lazy {
+        @Suppress("DEPRECATION")
+        requireArguments().getSerializable(EXTRA_TRACK) as Track
     }
     private val viewModel: PlayerViewModel by viewModel { parametersOf(track) }
 
-    private lateinit var binding: ActivityPlayerBinding
+    private lateinit var binding: FragmentPlayerBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
+        binding = FragmentPlayerBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.back.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         initViews(track)
         observeViewModel()
     }
 
     private fun initViews(track: Track) {
-        binding.back.setNavigationOnClickListener {
-            finish()
-        }
-
         with(binding) {
             trackTitle.text = track.trackName.trim()
             trackArtist.text = track.artistName.trim()
             trackTime.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
 
-            Glide.with(this@PlayerActivity)
+            Glide.with(this@PlayerFragment)
                 .load(track.getCoverArtwork())
                 .placeholder(R.drawable.placeholder)
                 .transform(RoundedCorners((8 * resources.displayMetrics.density).toInt()))
@@ -101,7 +116,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.state.observe(this) { state ->
+        viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.playBtn.isEnabled = state.isPlayButtonEnabled
             binding.playBtn.setImageResource(
                 if (state.isPlaying) R.drawable.ic_pause_100
