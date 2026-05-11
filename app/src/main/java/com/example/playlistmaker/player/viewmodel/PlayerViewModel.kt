@@ -1,12 +1,14 @@
 package com.example.playlistmaker.player.viewmodel
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.search.domain.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -19,7 +21,7 @@ class PlayerViewModel(
         private const val UPDATE_DELAY = 300L
     }
 
-    private val handler = Handler(Looper.getMainLooper())
+    private var timerJob: Job? = null
     private var isPlaying = false
 
     private val _state = MutableLiveData(
@@ -73,18 +75,18 @@ class PlayerViewModel(
     private fun stopTimer() {
         playerInteractor.pause()
         isPlaying = false
+        timerJob?.cancel()
         _state.postValue(_state.value?.copy(isPlaying = false))
     }
     private fun updateTime() {
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                if (isPlaying) {
-                    val time = formatTime(playerInteractor.getCurrentPosition())
-                    _state.postValue(_state.value?.copy(currentTime = time))
-                    handler.postDelayed(this, UPDATE_DELAY)
-                }
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (isPlaying) {
+                val time = formatTime(playerInteractor.getCurrentPosition())
+                _state.postValue(_state.value?.copy(currentTime = time))
+                delay(UPDATE_DELAY)
             }
-        }, UPDATE_DELAY)
+        }
     }
 
 
@@ -94,7 +96,7 @@ class PlayerViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        handler.removeCallbacksAndMessages(null)
+        timerJob?.cancel()
         playerInteractor.release()
     }
 }
