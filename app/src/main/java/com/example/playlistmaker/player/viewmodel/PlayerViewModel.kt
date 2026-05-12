@@ -30,32 +30,28 @@ class PlayerViewModel(
         PlayerState(
             isPlayButtonEnabled = false,
             isPlaying = false,
-            currentTime = "00:00"
+            currentTime = "00:00",
+            isFavorite = track.isFavorite
         )
     )
     val state: LiveData<PlayerState> = _state
 
-    private val _isFavorite = MutableLiveData(track.isFavorite)
-    val isFavorite: LiveData<Boolean> = _isFavorite
 
     init {
         playerInteractor.setOnPreparedListener {
-            _state.postValue(
-                PlayerState(
-                    isPlayButtonEnabled = true,
-                    isPlaying = false,
-                    currentTime = "00:00"
-                )
+            _state.value = _state.value?.copy(
+                isPlayButtonEnabled = true,
+                isPlaying = false,
+                currentTime = "00:00"
             )
         }
         playerInteractor.setOnCompletionListener {
             isPlaying = false
-            _state.postValue(
-                PlayerState(
-                    isPlayButtonEnabled = true,
-                    isPlaying = false,
-                    currentTime = "00:00"
-                )
+            timerJob?.cancel()
+            _state.value = _state.value?.copy(
+                isPlayButtonEnabled = true,
+                isPlaying = false,
+                currentTime = "00:00"
             )
         }
 
@@ -72,13 +68,14 @@ class PlayerViewModel(
 
     fun onFavoriteClicked() {
         viewModelScope.launch {
-            if (_isFavorite.value == true) {
+            val currentIsFavorite = _state.value?.isFavorite ?: false
+            if (currentIsFavorite) {
                 favoriteInteractor.deleteFromFavorite(track)
-                _isFavorite.value = false
+                _state.value = _state.value?.copy(isFavorite = false)
                 track.isFavorite = false
             } else {
                 favoriteInteractor.addToFavorite(track)
-                _isFavorite.value = true
+                _state.value = _state.value?.copy(isFavorite = true)
                 track.isFavorite = true
             }
         }
@@ -97,6 +94,7 @@ class PlayerViewModel(
         timerJob?.cancel()
         _state.postValue(_state.value?.copy(isPlaying = false))
     }
+
     private fun updateTime() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -118,8 +116,10 @@ class PlayerViewModel(
         playerInteractor.release()
     }
 }
+
 data class PlayerState(
     val isPlayButtonEnabled: Boolean,
     val isPlaying: Boolean,
-    val currentTime: String
+    val currentTime: String,
+    val isFavorite: Boolean
 )

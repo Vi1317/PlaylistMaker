@@ -117,10 +117,8 @@ class PlayerFragment : Fragment() {
                 else R.drawable.ic_play_100
             )
             binding.playTime.text = state.currentTime
-        }
 
-        viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
-            if (isFavorite) {
+            if (state.isFavorite) {
                 binding.like.setImageResource(R.drawable.ic_like_active_25)
             } else {
                 binding.like.setImageResource(R.drawable.ic_like_25)
