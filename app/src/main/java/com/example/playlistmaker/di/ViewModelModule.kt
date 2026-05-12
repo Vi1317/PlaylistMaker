@@ -12,12 +12,12 @@ import com.example.playlistmaker.settings.viewmodel.SettingsViewModel
 val viewModelModule = module {
     //Поиск
     viewModel {
-        SearchViewModel(get(), get())
+        SearchViewModel(get(), get(), get())
     }
 
     //Плеер
     viewModel { (track: Track) ->
-        PlayerViewModel(get(), track)
+        PlayerViewModel( get(),get(), track)
     }
 
     //Настройки
@@ -27,7 +27,7 @@ val viewModelModule = module {
 
     //Медиатека
     viewModel {
-        FavoriteViewModel()
+        FavoriteViewModel(get())
     }
 
     viewModel {

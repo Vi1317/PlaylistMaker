@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Job
@@ -14,6 +15,7 @@ import java.util.Locale
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
+    private val favoriteInteractor: FavoriteInteractor,
     private val track: Track
 ) : ViewModel() {
 
@@ -32,6 +34,9 @@ class PlayerViewModel(
         )
     )
     val state: LiveData<PlayerState> = _state
+
+    private val _isFavorite = MutableLiveData(track.isFavorite)
+    val isFavorite: LiveData<Boolean> = _isFavorite
 
     init {
         playerInteractor.setOnPreparedListener {
@@ -65,6 +70,20 @@ class PlayerViewModel(
         }
     }
 
+    fun onFavoriteClicked() {
+        viewModelScope.launch {
+            if (_isFavorite.value == true) {
+                favoriteInteractor.deleteFromFavorite(track)
+                _isFavorite.value = false
+                track.isFavorite = false
+            } else {
+                favoriteInteractor.addToFavorite(track)
+                _isFavorite.value = true
+                track.isFavorite = true
+            }
+        }
+    }
+
     private fun startTimer() {
         playerInteractor.start()
         isPlaying = true
@@ -88,7 +107,6 @@ class PlayerViewModel(
             }
         }
     }
-
 
     private fun formatTime(millis: Int): String {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)

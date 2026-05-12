@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
@@ -13,11 +14,11 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
-    private val searchHistoryInteractor: SearchHistoryInteractor
+    private val searchHistoryInteractor: SearchHistoryInteractor,
+    private val favoriteInteractor: FavoriteInteractor
 ) : ViewModel() {
 
     private val _state = MutableLiveData(SearchState())
-
     val state: LiveData<SearchState> = _state
 
     private var searchJob: Job? = null
@@ -27,26 +28,20 @@ class SearchViewModel(
     }
 
     private fun loadHistory() {
-        searchHistoryInteractor.getHistory(object : SearchHistoryInteractor.HistoryConsumer {
-            override fun consume(history: Result<List<Track>>) {
-                history.fold(
-                    onSuccess = { tracks ->
-                        _state.postValue(_state.value?.copy(
-                            showHistory = true,
-                            historyTracks = tracks,
-                            historyEmpty = tracks.isEmpty()
-                        ))
-                    },
-                    onFailure = { exception ->
-                        _state.postValue(_state.value?.copy(
-                            showHistory = true,
-                            historyTracks = emptyList(),
-                            historyEmpty = true
-                        ))
-                    }
-                )
+        viewModelScope.launch {
+            val history = searchHistoryInteractor.getHistory()
+            val favoriteIds = favoriteInteractor.getFavoriteIds()
+
+            val updatedHistory = history.map { track ->
+                track.apply { isFavorite = favoriteIds.contains(track.trackId) }
             }
-        })
+
+            _state.value = _state.value?.copy(
+                showHistory = true,
+                historyTracks = updatedHistory,
+                historyEmpty = updatedHistory.isEmpty()
+            )
+        }
     }
 
     fun searchDebounce(query: String) {
@@ -74,7 +69,7 @@ class SearchViewModel(
         }
     }
 
-    private fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
+    private suspend fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
         when {
             errorMessage != null -> {
                 _state.value = _state.value?.copy(
@@ -93,11 +88,18 @@ class SearchViewModel(
                 )
             }
             else -> {
+                val favoriteIds = favoriteInteractor.getFavoriteIds()
+
+                val updatedTracks = foundTracks.map { track ->
+                    track.apply {
+                        isFavorite = favoriteIds.contains(track.trackId)
+                    }
+                }
                 _state.value = _state.value?.copy(
                     isLoading = false,
                     isError = false,
                     isEmpty = false,
-                    tracks = foundTracks
+                    tracks = updatedTracks
                 )
             }
         }
