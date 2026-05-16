@@ -103,14 +103,8 @@ class PlayerFragment : Fragment() {
                 viewModel.onPlayButtonClicked()
             }
 
-            var isLiked = false
             like.setOnClickListener {
-                isLiked = !isLiked
-                if (isLiked) {
-                    like.setImageResource(R.drawable.ic_like_active_25)
-                } else {
-                    like.setImageResource(R.drawable.ic_like_25)
-                }
+                viewModel.onFavoriteClicked()
             }
         }
     }
@@ -123,6 +117,12 @@ class PlayerFragment : Fragment() {
                 else R.drawable.ic_play_100
             )
             binding.playTime.text = state.currentTime
+
+            if (state.isFavorite) {
+                binding.like.setImageResource(R.drawable.ic_like_active_25)
+            } else {
+                binding.like.setImageResource(R.drawable.ic_like_25)
+            }
         }
     }
 

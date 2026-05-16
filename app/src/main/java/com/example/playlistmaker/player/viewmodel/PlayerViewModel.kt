@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Job
@@ -14,6 +15,7 @@ import java.util.Locale
 
 class PlayerViewModel(
     private val playerInteractor: PlayerInteractor,
+    private val favoriteInteractor: FavoriteInteractor,
     private val track: Track
 ) : ViewModel() {
 
@@ -28,29 +30,28 @@ class PlayerViewModel(
         PlayerState(
             isPlayButtonEnabled = false,
             isPlaying = false,
-            currentTime = "00:00"
+            currentTime = "00:00",
+            isFavorite = track.isFavorite
         )
     )
     val state: LiveData<PlayerState> = _state
 
+
     init {
         playerInteractor.setOnPreparedListener {
-            _state.postValue(
-                PlayerState(
-                    isPlayButtonEnabled = true,
-                    isPlaying = false,
-                    currentTime = "00:00"
-                )
+            _state.value = _state.value?.copy(
+                isPlayButtonEnabled = true,
+                isPlaying = false,
+                currentTime = "00:00"
             )
         }
         playerInteractor.setOnCompletionListener {
             isPlaying = false
-            _state.postValue(
-                PlayerState(
-                    isPlayButtonEnabled = true,
-                    isPlaying = false,
-                    currentTime = "00:00"
-                )
+            timerJob?.cancel()
+            _state.value = _state.value?.copy(
+                isPlayButtonEnabled = true,
+                isPlaying = false,
+                currentTime = "00:00"
             )
         }
 
@@ -62,6 +63,21 @@ class PlayerViewModel(
             stopTimer()
         } else {
             startTimer()
+        }
+    }
+
+    fun onFavoriteClicked() {
+        viewModelScope.launch {
+            val currentIsFavorite = _state.value?.isFavorite ?: false
+            if (currentIsFavorite) {
+                favoriteInteractor.deleteFromFavorite(track)
+                _state.value = _state.value?.copy(isFavorite = false)
+                track.isFavorite = false
+            } else {
+                favoriteInteractor.addToFavorite(track)
+                _state.value = _state.value?.copy(isFavorite = true)
+                track.isFavorite = true
+            }
         }
     }
 
@@ -78,6 +94,7 @@ class PlayerViewModel(
         timerJob?.cancel()
         _state.postValue(_state.value?.copy(isPlaying = false))
     }
+
     private fun updateTime() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -89,7 +106,6 @@ class PlayerViewModel(
         }
     }
 
-
     private fun formatTime(millis: Int): String {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
     }
@@ -100,8 +116,10 @@ class PlayerViewModel(
         playerInteractor.release()
     }
 }
+
 data class PlayerState(
     val isPlayButtonEnabled: Boolean,
     val isPlaying: Boolean,
-    val currentTime: String
+    val currentTime: String,
+    val isFavorite: Boolean
 )

@@ -1,6 +1,10 @@
 package com.example.playlistmaker.di
 
 import android.media.MediaPlayer
+import com.example.playlistmaker.media.domain.db.FavoriteInteractor
+import com.example.playlistmaker.media.domain.db.FavoriteInteractorImpl
+import com.example.playlistmaker.media.domain.db.FavoriteRepository
+import com.example.playlistmaker.media.domain.db.FavoriteRepositoryImpl
 import com.example.playlistmaker.player.data.PlayerRepositoryImpl
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractorImpl
@@ -59,5 +63,14 @@ val domainModule = module {
 
     factory<SharingInteractor> {
         SharingInteractorImpl(get(), get())
+    }
+
+    //БД
+    single<FavoriteRepository> {
+        FavoriteRepositoryImpl(get(), get())
+    }
+
+    single<FavoriteInteractor> {
+        FavoriteInteractorImpl(get())
     }
 }

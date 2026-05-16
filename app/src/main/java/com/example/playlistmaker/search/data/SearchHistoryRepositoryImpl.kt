@@ -7,7 +7,7 @@ import com.example.playlistmaker.search.domain.api.SearchHistoryRepository
 
 class SearchHistoryRepositoryImpl (private val storage: SearchHistoryStorage) :
     SearchHistoryRepository {
-        override fun getHistory(): Result<List<Track>> {
+        override suspend fun getHistory(): Result<List<Track>> {
                 val entities = storage.getData()
                 val track = entities.map { it.toDomain() }
                 return Result.success(track)

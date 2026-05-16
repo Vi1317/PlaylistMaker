@@ -2,7 +2,10 @@ package com.example.playlistmaker.di
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.room.Room
 import com.example.playlistmaker.creator.ResourcesProviderImpl
+import com.example.playlistmaker.media.data.converters.FavoriteDbConvertor
+import com.example.playlistmaker.media.data.db.AppDatabase
 import com.example.playlistmaker.search.data.NetworkClient
 import com.example.playlistmaker.search.data.SearchHistoryStorage
 import com.example.playlistmaker.search.data.network.ITunesApi
@@ -57,5 +60,15 @@ val dataModule = module {
 
     factory {
         MediaPlayer()
+    }
+
+    //БД
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .build()
+    }
+
+    factory {
+        FavoriteDbConvertor()
     }
 }
