@@ -1,6 +1,7 @@
 package com.example.playlistmaker.di
 
 import com.example.playlistmaker.media.viewmodel.FavoriteViewModel
+import com.example.playlistmaker.media.viewmodel.NewPlaylistViewModel
 import com.example.playlistmaker.media.viewmodel.PlaylistViewModel
 import com.example.playlistmaker.player.viewmodel.PlayerViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -17,7 +18,7 @@ val viewModelModule = module {
 
     //Плеер
     viewModel { (track: Track) ->
-        PlayerViewModel( get(),get(), track)
+        PlayerViewModel( get(),get(), get(), track)
     }
 
     //Настройки
@@ -31,6 +32,10 @@ val viewModelModule = module {
     }
 
     viewModel {
-        PlaylistViewModel()
+        PlaylistViewModel(get())
+    }
+
+    viewModel {
+        NewPlaylistViewModel(get())
     }
 }
