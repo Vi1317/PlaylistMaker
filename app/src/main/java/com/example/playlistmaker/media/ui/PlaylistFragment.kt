@@ -56,9 +56,16 @@ class PlaylistFragment : Fragment() {
     }
 
     private fun updatePlaylists(playlists: List<Playlist>) {
+        val formatedPlaylists = playlists.map { playlist ->
+            playlist.copy(trackCountFormatted = formatTrackCount(playlist.trackCount))
+        }
         playlistAdapter = PlaylistAdapter(playlists) { playlist ->  }
 
         binding.playlistsRecyclerView.adapter = playlistAdapter
+    }
+
+    private fun formatTrackCount(count: Int): String {
+        return resources.getQuantityString(R.plurals.track_count, count, count)
     }
 
     override fun onResume() {

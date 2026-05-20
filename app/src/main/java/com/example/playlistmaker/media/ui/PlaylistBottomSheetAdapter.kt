@@ -30,15 +30,13 @@ class PlaylistBottomSheetAdapter(
 
         fun bind(playlist: Playlist, onItemClick: (Playlist) -> Unit) {
             binding.playlistName.text = playlist.name
-            val trackSum = playlist.trackCount
+            val trackCountText = itemView.context.resources.getQuantityString(
+                R.plurals.track_count,
+                playlist.trackCount,
+                playlist.trackCount
+            )
 
-            val trackWord = when {
-                trackSum % 10 == 1 && trackSum % 100 != 11 -> "трек"
-                trackSum % 10 in 2..4 && (trackSum % 100 !in 11..14) -> "трека"
-                else -> "треков"
-            }
-
-            binding.trackCount.text = "$trackSum $trackWord"
+            binding.trackCount.text = trackCountText
 
             if (playlist.coverPath.isNotEmpty()) {
                 Glide.with(binding.root)

@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -145,19 +144,22 @@ class NewPlaylistFragment : Fragment() {
 
         viewModel.createPlaylist(name, description, coverPath)
 
-        showCustomToast(requireContext(), "Плейлист $name создан")
+        showCustomToast(
+            requireContext(),
+            getString(R.string.playlist_created, name)
+        )
 
         findNavController().navigateUp()
     }
 
     private fun showExitDialog() {
         AlertDialog.Builder(requireContext(),R.style.CustomAlertDialogTheme)
-            .setTitle("Завершить создание плейлиста?")
-            .setMessage("Все несохраненные данные будут потеряны")
-            .setPositiveButton("Завершить") {_, _ ->
+            .setTitle(R.string.exit_playlist_creation_title)
+            .setMessage(R.string.exit_playlist_creation_message)
+            .setPositiveButton(R.string.finish) { _, _ ->
                 findNavController().navigateUp()
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

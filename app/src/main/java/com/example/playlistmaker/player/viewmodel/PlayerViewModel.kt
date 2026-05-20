@@ -1,9 +1,12 @@
 package com.example.playlistmaker.player.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.playlistmaker.R
 import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.media.domain.db.PlaylistInteractor
 import com.example.playlistmaker.media.domain.models.Playlist
@@ -16,11 +19,12 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class PlayerViewModel(
+    application: Application,
     private val playerInteractor: PlayerInteractor,
     private val favoriteInteractor: FavoriteInteractor,
     private val playlistInteractor: PlaylistInteractor,
     private val track: Track
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     companion object {
         private const val UPDATE_DELAY = 300L
@@ -105,15 +109,20 @@ class PlayerViewModel(
         viewModelScope.launch {
             if (playlist.trackIds.contains(track.trackId)) {
                 _state.value = _state.value?.copy(
-                    addToPlaylistMessage = "Трек уже добавлен в плейлист ${playlist.name}"
+                    addToPlaylistMessage = getApplication<Application>().getString(
+                        R.string.track_already_added,
+                        playlist.name
+                    )
                 )
             } else {
+                playlistInteractor.addTrackToPlaylist(playlist, track)
+
                 val updatedTrackIds = playlist.trackIds + listOf(track.trackId)
                 val updatedPlaylist = playlist.copy(
                     trackIds = updatedTrackIds,
                     trackCount = playlist.trackCount + 1
                 )
-                playlistInteractor.updatePlaylist(updatedPlaylist)
+
                 val currentPlaylists = _state.value?.playlists ?: emptyList()
                 val updatedPlaylists = currentPlaylists.map { p ->
                     if (p.id == playlist.id) updatedPlaylist else p
@@ -121,7 +130,10 @@ class PlayerViewModel(
                 _state.value = _state.value?.copy(
                     playlists = updatedPlaylists,
                     isAddedToAnyPlaylist = true,
-                    addToPlaylistMessage = "Добавлено в плейлист ${playlist.name}"
+                    addToPlaylistMessage = getApplication<Application>().getString(
+                        R.string.track_added,
+                        playlist.name
+                    )
                 )
             }
             delay(2000)
