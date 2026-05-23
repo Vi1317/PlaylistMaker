@@ -5,14 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentPlaylistBinding
-import com.example.playlistmaker.player.viewmodel.PlayerViewModel
+import com.example.playlistmaker.media.domain.models.Playlist
+import com.example.playlistmaker.media.viewmodel.PlaylistViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistFragment : Fragment() {
-    private val playlistViewModel: PlayerViewModel by viewModel()
-
     private lateinit var binding: FragmentPlaylistBinding
+    private val playlistViewModel: PlaylistViewModel by viewModel()
+    private lateinit var playlistAdapter: PlaylistAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,10 +30,46 @@ class PlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showNotFoundError()
+        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->  }
+
+        binding.playlistsRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.playlistsRecyclerView.adapter = playlistAdapter
+
+        binding.newPlaylistButton.setOnClickListener {
+            findNavController().navigate(R.id.action_mediaFragment_to_newPlaylistFragment)
+        }
+
+        playlistViewModel.state.observe(viewLifecycleOwner) {state ->
+            when (state) {
+                is PlaylistViewModel.PlaylistState.Empty -> {
+                    binding.notFoundError.visibility = View.VISIBLE
+                    binding.playlistsRecyclerView.visibility = View.GONE
+                }
+
+                is PlaylistViewModel.PlaylistState.Content -> {
+                    binding.notFoundError.visibility = View.GONE
+                    binding.playlistsRecyclerView.visibility = View.VISIBLE
+                    updatePlaylists(state.playlists)
+                }
+            }
+        }
     }
 
-    private fun showNotFoundError() {
-        binding.notFoundError.visibility = View.VISIBLE
+    private fun updatePlaylists(playlists: List<Playlist>) {
+        val formatedPlaylists = playlists.map { playlist ->
+            playlist.copy(trackCountFormatted = formatTrackCount(playlist.trackCount))
+        }
+        playlistAdapter = PlaylistAdapter(playlists) { playlist ->  }
+
+        binding.playlistsRecyclerView.adapter = playlistAdapter
+    }
+
+    private fun formatTrackCount(count: Int): String {
+        return resources.getQuantityString(R.plurals.track_count, count, count)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playlistViewModel.loadPlaylists()
     }
 }

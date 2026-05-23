@@ -1,36 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_playlist"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/colorPrimary"
     android:fillViewport="true"
-    android:id="@+id/fragment_playlist"
     tools:context="com.example.playlistmaker.media.ui.PlaylistFragment">
 
-        <LinearLayout
-            android:id="@+id/not_found_error"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:gravity="top|center_horizontal"
-            android:orientation="vertical">
+    <Button
+        android:id="@+id/new_playlist_button"
+        style="@style/SearchErrorButton"
+        android:text="@string/new_playlist"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-            <Button
-                android:id="@+id/new_playlist_button"
-                style="@style/SearchErrorButton"
-                android:text="@string/new_playlist"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/playlists_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/new_playlist_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="visible" />
 
-            <ImageView
-                android:id="@+id/not_found_img"
-                style="@style/SearchErrorImg"
-                android:layout_marginTop="46dp"
-                android:contentDescription="@string/not_found_playlist"
-                android:src="@drawable/not_found_error" />
+    <LinearLayout
+        android:id="@+id/not_found_error"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="top|center"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/new_playlist_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone">
 
-            <TextView
-                android:id="@+id/not_found_title"
-                style="@style/SearchErrorTitle"
-                android:layout_marginTop="@dimen/padding_16"
-                android:text="@string/not_found_playlist" />
-        </LinearLayout>
-</ScrollView>
+        <ImageView
+            android:id="@+id/not_found_img"
+            style="@style/SearchErrorImg"
+            android:layout_marginTop="46dp"
+            android:contentDescription="@string/not_found_playlist"
+            android:src="@drawable/not_found_error" />
+
+        <TextView
+            android:id="@+id/not_found_title"
+            style="@style/SearchErrorTitle"
+            android:layout_marginTop="@dimen/padding_16"
+            android:text="@string/not_found_playlist" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

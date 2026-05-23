@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import androidx.room.Room
 import com.example.playlistmaker.creator.ResourcesProviderImpl
 import com.example.playlistmaker.media.data.converters.FavoriteDbConvertor
+import com.example.playlistmaker.media.data.converters.PlaylistDbConvertor
 import com.example.playlistmaker.media.data.db.AppDatabase
 import com.example.playlistmaker.search.data.NetworkClient
 import com.example.playlistmaker.search.data.SearchHistoryStorage
@@ -70,5 +71,9 @@ val dataModule = module {
 
     factory {
         FavoriteDbConvertor()
+    }
+
+    factory {
+        PlaylistDbConvertor(get())
     }
 }

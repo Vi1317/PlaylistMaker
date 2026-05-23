@@ -5,6 +5,10 @@ import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.media.domain.db.FavoriteInteractorImpl
 import com.example.playlistmaker.media.domain.db.FavoriteRepository
 import com.example.playlistmaker.media.domain.db.FavoriteRepositoryImpl
+import com.example.playlistmaker.media.domain.db.PlaylistInteractor
+import com.example.playlistmaker.media.domain.db.PlaylistInteractorImpl
+import com.example.playlistmaker.media.domain.db.PlaylistRepository
+import com.example.playlistmaker.media.domain.db.PlaylistRepositoryImpl
 import com.example.playlistmaker.player.data.PlayerRepositoryImpl
 import com.example.playlistmaker.player.domain.PlayerInteractor
 import com.example.playlistmaker.player.domain.PlayerInteractorImpl
@@ -72,5 +76,13 @@ val domainModule = module {
 
     single<FavoriteInteractor> {
         FavoriteInteractorImpl(get())
+    }
+
+    single<PlaylistRepository> {
+        PlaylistRepositoryImpl(get(), get())
+    }
+
+    single<PlaylistInteractor> {
+        PlaylistInteractorImpl(get())
     }
 }
