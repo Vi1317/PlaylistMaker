@@ -4,29 +4,30 @@ import android.media.MediaPlayer
 import com.example.playlistmaker.player.domain.PlayerRepository
 import java.io.IOException
 
-class PlayerRepositoryImpl (private val mediaPlayer: MediaPlayer) : PlayerRepository {
+class PlayerRepositoryImpl : PlayerRepository {
+    private var mediaPlayer: MediaPlayer? = null
     private var preparedListener: (() -> Unit)? = null
     private var completionListener: (() -> Unit)? = null
     private var errorListener: (() -> Unit)? = null
 
     override fun prepare(url: String?) {
-        try {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.stop()
-            }
-            mediaPlayer.reset()
+        release()
 
-            mediaPlayer.setDataSource(url)
-            mediaPlayer.prepareAsync()
-            mediaPlayer.setOnPreparedListener {
-                preparedListener?.invoke()
-            }
-            mediaPlayer.setOnCompletionListener {
-                completionListener?.invoke()
-            }
-            mediaPlayer.setOnErrorListener { _, _, _ ->
-                errorListener?.invoke()
-                true
+        try {
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(url)
+                prepareAsync()
+
+                setOnPreparedListener {
+                    preparedListener?.invoke()
+                }
+                setOnCompletionListener {
+                    completionListener?.invoke()
+                }
+                setOnErrorListener { _, _, _ ->
+                    errorListener?.invoke()
+                    true
+                }
             }
         } catch (e: IOException) {
             errorListener?.invoke()
@@ -34,23 +35,38 @@ class PlayerRepositoryImpl (private val mediaPlayer: MediaPlayer) : PlayerReposi
     }
 
     override fun start() {
-        mediaPlayer.start()
+        mediaPlayer?.start()
     }
 
     override fun pause() {
-        mediaPlayer.pause()
+        mediaPlayer?.pause()
     }
 
     override fun release() {
-        mediaPlayer.release()
+        mediaPlayer?.apply {
+            if (isPlaying) {
+                stop()
+            }
+            reset()
+            release()
+        }
+        mediaPlayer = null
     }
 
     override fun isPlaying() : Boolean {
-        return mediaPlayer.isPlaying
+        return try {
+            mediaPlayer?.isPlaying ?: false
+        } catch (e: IllegalStateException) {
+            false
+        }
     }
 
     override fun getCurrentPosition() : Int {
-        return mediaPlayer.currentPosition
+        return try {
+            mediaPlayer?.currentPosition ?: 0
+        } catch (e: IllegalStateException) {
+            0
+        }
     }
 
     override fun setOnPreparedListener(listener: () -> Unit) {

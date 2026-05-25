@@ -22,4 +22,16 @@ class NewPlaylistViewModel(
             playlistInteractor.createPlaylist(playlist)
         }
     }
+
+    fun updatePlaylist(playlistId: Long, name: String, description: String, coverPath: String) {
+        viewModelScope.launch {
+            val existingPlaylist = playlistInteractor.getPlaylistById(playlistId) ?: return@launch
+            val updatedPlaylist = existingPlaylist.copy(
+                name = name,
+                description = description,
+                coverPath = coverPath
+            )
+            playlistInteractor.updatePlaylist(updatedPlaylist)
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.playlistmaker.di
 
-import android.media.MediaPlayer
 import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.media.domain.db.FavoriteInteractorImpl
 import com.example.playlistmaker.media.domain.db.FavoriteRepository
@@ -49,7 +48,7 @@ val domainModule = module {
 
     //Плеер
     factory<PlayerRepository> {
-        PlayerRepositoryImpl(get())
+        PlayerRepositoryImpl()
     }
 
     factory<PlayerInteractor> {

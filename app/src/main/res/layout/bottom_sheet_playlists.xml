@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="@drawable/bottom_sheet_bg"
     app:behavior_hideable="true"
@@ -15,8 +16,7 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
-        android:background="@color/search_clr"
-        android:alpha="0.4" />
+        android:background="@color/search_clr"/>
 
     <TextView
         android:id="@+id/title"
@@ -43,5 +43,6 @@
         android:id="@+id/playlists_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp" />
+        android:paddingHorizontal="16dp"
+        tools:listitem="@layout/playlist_list_item" />
 </LinearLayout>

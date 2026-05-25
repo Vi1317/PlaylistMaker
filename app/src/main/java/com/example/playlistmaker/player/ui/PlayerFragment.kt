@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,7 +48,7 @@ class PlayerFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         binding = FragmentPlayerBinding.inflate(layoutInflater)
         return binding.root
     }
@@ -93,6 +92,12 @@ class PlayerFragment : Fragment() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
+        playlistAdapter = PlaylistBottomSheetAdapter(emptyList()) { playlist ->
+            viewModel.addTrackToPlaylist(playlist)
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+        binding.bottomSheet.playlistsRecycler.adapter = playlistAdapter
+
         initViews(track)
         observeViewModel()
     }
@@ -110,7 +115,7 @@ class PlayerFragment : Fragment() {
                 .transform(RoundedCorners((8 * resources.displayMetrics.density).toInt()))
                 .into(trackCover)
 
-            if (track.collectionName.isNullOrEmpty()) {
+            if (track.collectionName.isEmpty()) {
                 trackAlbum.visibility = View.GONE
                 trackAlbumTitle.visibility = View.GONE
             } else {
@@ -167,11 +172,7 @@ class PlayerFragment : Fragment() {
                 binding.add.setImageResource(R.drawable.ic_add_23)
             }
 
-            playlistAdapter = PlaylistBottomSheetAdapter(state.playlists) { playlist ->
-                viewModel.addTrackToPlaylist(playlist)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
-            binding.bottomSheet.playlistsRecycler.adapter = playlistAdapter
+            playlistAdapter.updatePlaylists(state.playlists)
 
             state.addToPlaylistMessage?.let { message ->
                 showCustomToast(requireContext(), message)

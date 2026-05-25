@@ -19,8 +19,10 @@ import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentNewPlaylistBinding
+import com.example.playlistmaker.media.domain.models.Playlist
 import com.example.playlistmaker.media.viewmodel.NewPlaylistViewModel
 import com.example.playlistmaker.util.showCustomToast
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -32,6 +34,10 @@ class NewPlaylistFragment : Fragment() {
     private var selectedImageUri: Uri? = null
     private var hasChanges = false
     private val viewModel: NewPlaylistViewModel by viewModel()
+
+    private var isEditMode = false
+    private var editingPlaylistId: Long = 0
+    private var originalCoverPath: String = ""
 
     private val pickMediaLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -57,8 +63,39 @@ class NewPlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        arguments?.let {
+            if (it.containsKey(ARG_PLAYLIST_ID)) {
+                isEditMode = true
+                editingPlaylistId = it.getLong(ARG_PLAYLIST_ID)
+                originalCoverPath = it.getString(ARG_PLAYLIST_COVER_PATH) ?: ""
+
+                binding.playlistName.setText(it.getString(ARG_PLAYLIST_NAME))
+                binding.playlistDescription.setText(it.getString(ARG_PLAYLIST_DESCRIPTION))
+
+                if (originalCoverPath.isNotEmpty()) {
+                    selectedImageUri = originalCoverPath.toUri()
+                    binding.playlistCover.scaleType = ImageView.ScaleType.CENTER_CROP
+                    Glide.with(this)
+                        .load(originalCoverPath)
+                        .placeholder(R.drawable.placeholder)
+                        .into(binding.playlistCover)
+                }
+            }
+        }
+
+        if (isEditMode) {
+            binding.back.title = getString(R.string.edit)
+            binding.create.text = getString(R.string.save)
+            binding.create.isEnabled  = true
+        } else {
+            binding.back.title = getString(R.string.new_playlist)
+            binding.create.text = getString(R.string.create)
+        }
+
         binding.back.setNavigationOnClickListener {
-            if (hasChanges) {
+            if (isEditMode) {
+                findNavController().navigateUp()
+            } else if (hasChanges) {
                 showExitDialog()
             } else {
                 findNavController().navigateUp()
@@ -69,7 +106,9 @@ class NewPlaylistFragment : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (hasChanges) {
+                    if (isEditMode) {
+                        findNavController().navigateUp()
+                    } else if (hasChanges) {
                         showExitDialog()
                     } else {
                         findNavController().navigateUp()
@@ -83,12 +122,16 @@ class NewPlaylistFragment : Fragment() {
         }
 
         binding.create.setOnClickListener {
-            createPlaylist()
+            if (isEditMode) {
+                updatePlaylist()
+            } else {
+                createPlaylist()
+            }
         }
 
         binding.playlistName.addTextChangedListener { text ->
             binding.create.isEnabled = !text.isNullOrEmpty()
-            hasChanges = true
+            if (!isEditMode) hasChanges = true
         }
 
         binding.playlistName.setOnEditorActionListener { _, actionId, _ ->
@@ -101,7 +144,7 @@ class NewPlaylistFragment : Fragment() {
         }
 
         binding.playlistDescription.addTextChangedListener {
-            hasChanges = true
+            if (!isEditMode) hasChanges = true
         }
 
         binding.playlistDescription.setOnEditorActionListener { _, actionId, _ ->
@@ -152,6 +195,23 @@ class NewPlaylistFragment : Fragment() {
         findNavController().navigateUp()
     }
 
+    private fun updatePlaylist() {
+        val name = binding.playlistName.text.toString().trim()
+        if (name.isEmpty()) return
+
+        val description = binding.playlistDescription.text.toString().trim()
+        val coverPath = selectedImageUri?.toString() ?: originalCoverPath
+
+        viewModel.updatePlaylist(editingPlaylistId, name, description, coverPath)
+
+        showCustomToast(
+            requireContext(),
+            getString(R.string.playlist_updated, name)
+        )
+
+        findNavController().navigateUp()
+    }
+
     private fun showExitDialog() {
         AlertDialog.Builder(requireContext(),R.style.CustomAlertDialogTheme)
             .setTitle(R.string.exit_playlist_creation_title)
@@ -166,5 +226,21 @@ class NewPlaylistFragment : Fragment() {
     private fun closeKeyboard() {
         val imm = requireContext().getSystemService(InputMethodManager::class.java)
         imm?.hideSoftInputFromWindow(binding.root.windowToken, 0)
+    }
+
+    companion object {
+        private const val ARG_PLAYLIST_ID = "playlist_id"
+        private const val ARG_PLAYLIST_NAME = "playlist_name"
+        private const val ARG_PLAYLIST_DESCRIPTION = "playlist_description"
+        private const val ARG_PLAYLIST_COVER_PATH = "playlist_cover_path"
+
+        fun createArgs(playlist: Playlist): Bundle {
+            return Bundle().apply {
+                putLong(ARG_PLAYLIST_ID, playlist.id)
+                putString(ARG_PLAYLIST_NAME, playlist.name)
+                putString(ARG_PLAYLIST_DESCRIPTION, playlist.description)
+                putString(ARG_PLAYLIST_COVER_PATH, playlist.coverPath)
+            }
+        }
     }
 }
