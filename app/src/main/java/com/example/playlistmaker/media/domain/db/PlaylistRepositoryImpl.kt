@@ -22,7 +22,7 @@ class PlaylistRepositoryImpl(
         val playlistEntity = appDatabase.playlistDao().getPlaylistById(playlistId) ?: return
         val playlist = playlistDbConvertor.map(playlistEntity)
 
-        appDatabase.playlistDao().deletePlaylist(playlistEntity)
+        appDatabase.playlistDao().deletePlaylistById(playlistId)
 
         playlist.trackIds.forEach { trackId ->
             val trackExistsElsewhere = appDatabase.playlistDao()

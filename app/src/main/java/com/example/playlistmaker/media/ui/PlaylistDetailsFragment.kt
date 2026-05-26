@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -22,6 +23,7 @@ import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.ui.TrackAdapter
 import com.example.playlistmaker.util.showCustomToast
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -304,9 +306,12 @@ class PlaylistDetailsFragment : Fragment() {
             .setNegativeButton(R.string.no) { dialog, _ ->
                 dialog.dismiss()
             }
-            .setPositiveButton(R.string.yes) { _, _ ->
-                viewModel.deletePlaylist()
-                findNavController().navigateUp()
+            .setPositiveButton(R.string.yes) { dialog, _ ->
+                dialog.dismiss()
+                requireActivity().lifecycleScope.launch {
+                    viewModel.deletePlaylist()
+                    findNavController().navigateUp()
+                }
             }
             .show()
     }

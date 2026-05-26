@@ -51,10 +51,8 @@ class PlaylistDetailsViewModel(
         }
     }
 
-    fun deletePlaylist() {
-        viewModelScope.launch {
-            playlistInteractor.deletePlaylist(playlistId)
-        }
+    suspend fun deletePlaylist() {
+        playlistInteractor.deletePlaylist(playlistId)
     }
 
     private fun formatDuration(minutes: String): String {

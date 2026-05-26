@@ -5,8 +5,10 @@ import com.example.playlistmaker.search.data.dto.TrackSearchRequest
 import com.example.playlistmaker.search.data.dto.TrackSearchResponse
 import com.example.playlistmaker.search.domain.api.TracksRepository
 import com.example.playlistmaker.search.data.dto.toTrack
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class TracksRepositoryImpl (private val networkClient: NetworkClient) : TracksRepository {
 
@@ -15,7 +17,7 @@ class TracksRepositoryImpl (private val networkClient: NetworkClient) : TracksRe
 
         if (response.resultCode == 200) {
             with(response as TrackSearchResponse) {
-                val tracks = response.results.map { trackDto ->
+                val tracks = results.map { trackDto ->
                     trackDto.toTrack()
                 }
                 emit(Result.success(tracks))
@@ -23,5 +25,5 @@ class TracksRepositoryImpl (private val networkClient: NetworkClient) : TracksRe
         } else {
             emit(Result.failure(Exception("Ошибка сервера: ${response.resultCode}")))
         }
-    }
+    }.flowOn(Dispatchers.IO)
 }

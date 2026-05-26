@@ -22,8 +22,8 @@ interface PlaylistDao {
     @Update
     suspend fun updatePlaylist(playlist: PlaylistEntity)
 
-    @Delete
-    suspend fun deletePlaylist(track: PlaylistEntity)
+    @Query("DELETE FROM playlist_table WHERE id = :playlistId")
+    suspend fun deletePlaylistById(playlistId: Long)
 
     @Query("SELECT EXISTS(SELECT 1 FROM playlist_table WHERE trackIds LIKE '%' || :trackId || '%' AND id != :excludePlaylistId LIMIT 1)")
     suspend fun doesTrackExistInOtherPlaylists(trackId: Int, excludePlaylistId: Long): Boolean
