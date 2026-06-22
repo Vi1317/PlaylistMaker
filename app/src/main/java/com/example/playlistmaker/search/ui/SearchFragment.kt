@@ -38,7 +38,7 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -80,7 +80,6 @@ class SearchFragment : Fragment() {
         binding.clearSearch.setOnClickListener {
             binding.searchText.setText("")
             binding.clearSearch.visibility = View.GONE
-            viewModel.onSearchCleared()
             closeKeyboard()
         }
 
@@ -92,11 +91,8 @@ class SearchFragment : Fragment() {
 
         binding.searchText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (binding.searchText.text.isNotEmpty()) {
-                    viewModel.searchDebounce(binding.searchText.text.toString())
-                }
                 closeKeyboard()
-                true
+                return@setOnEditorActionListener true
             }
             false
         }
@@ -124,7 +120,7 @@ class SearchFragment : Fragment() {
             state.isError -> showConnectionError()
             state.isEmpty -> showNotFoundError()
             state.showHistory -> showHistory(state.historyTracks, state.historyEmpty)
-            else -> showSearchResults(state.tracks)
+            state.tracks.isNotEmpty() -> showSearchResults(state.tracks)
         }
     }
 

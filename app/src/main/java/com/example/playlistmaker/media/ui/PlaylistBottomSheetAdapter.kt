@@ -9,7 +9,7 @@ import com.example.playlistmaker.databinding.PlaylistListItemBinding
 import com.example.playlistmaker.media.domain.models.Playlist
 
 class PlaylistBottomSheetAdapter(
-    private val playlists: List<Playlist>,
+    private var playlists: List<Playlist>,
     private val onItemClick: (Playlist) -> Unit
 ) : RecyclerView.Adapter<PlaylistBottomSheetAdapter.ViewHolder>() {
 
@@ -23,6 +23,11 @@ class PlaylistBottomSheetAdapter(
     }
 
     override fun getItemCount(): Int = playlists.size
+
+    fun updatePlaylists(newPlaylists: List<Playlist>) {
+        playlists = newPlaylists
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(
         private val binding: PlaylistListItemBinding

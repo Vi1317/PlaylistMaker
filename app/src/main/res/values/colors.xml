@@ -11,4 +11,5 @@
     <color name="gray_btn_night">#535459</color>
     <color name="search_clr">#E6E8EB</color>
     <color name="play_btn">#1A1B22</color>
+    <color name="dialog_bg">#FFFFFF</color>
 </resources>

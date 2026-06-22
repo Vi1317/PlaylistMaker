@@ -22,7 +22,7 @@ class PlaylistFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         binding = FragmentPlaylistBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -30,7 +30,12 @@ class PlaylistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->  }
+        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            findNavController().navigate(
+                R.id.action_mediaFragment_to_playlistDetailsFragment,
+                PlaylistDetailsFragment.createArgs(playlist.id)
+            )
+        }
 
         binding.playlistsRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.playlistsRecyclerView.adapter = playlistAdapter
@@ -56,16 +61,7 @@ class PlaylistFragment : Fragment() {
     }
 
     private fun updatePlaylists(playlists: List<Playlist>) {
-        val formatedPlaylists = playlists.map { playlist ->
-            playlist.copy(trackCountFormatted = formatTrackCount(playlist.trackCount))
-        }
-        playlistAdapter = PlaylistAdapter(playlists) { playlist ->  }
-
-        binding.playlistsRecyclerView.adapter = playlistAdapter
-    }
-
-    private fun formatTrackCount(count: Int): String {
-        return resources.getQuantityString(R.plurals.track_count, count, count)
+        playlistAdapter.updatePlaylists(playlists)
     }
 
     override fun onResume() {

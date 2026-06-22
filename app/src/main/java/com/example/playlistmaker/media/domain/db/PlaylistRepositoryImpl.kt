@@ -18,9 +18,19 @@ class PlaylistRepositoryImpl(
         appDatabase.playlistDao().insertPlaylist(entity)
     }
 
-    override suspend fun deletePlaylist(playlist: Playlist) {
-        val entity = playlistDbConvertor.map(playlist)
-        appDatabase.playlistDao().deletePlaylist(entity)
+    override suspend fun deletePlaylist(playlistId: Long) {
+        val playlistEntity = appDatabase.playlistDao().getPlaylistById(playlistId) ?: return
+        val playlist = playlistDbConvertor.map(playlistEntity)
+
+        appDatabase.playlistDao().deletePlaylistById(playlistId)
+
+        playlist.trackIds.forEach { trackId ->
+            val trackExistsElsewhere = appDatabase.playlistDao()
+                .doesTrackExistInOtherPlaylists(trackId, playlistId)
+            if (!trackExistsElsewhere) {
+                appDatabase.trackInPlaylistDao().deleteTrack(trackId)
+            }
+        }
     }
 
     override fun getPlaylists(): Flow<List<Playlist>> {
@@ -59,5 +69,50 @@ class PlaylistRepositoryImpl(
 
         val entity = playlistDbConvertor.map(updatedPlaylist)
         appDatabase.playlistDao().updatePlaylist(entity)
+    }
+
+    override suspend fun getPlaylistById(id: Long): Playlist? {
+        val entity = appDatabase.playlistDao().getPlaylistById(id)
+        return entity?.let { playlistDbConvertor.map(it) }
+    }
+
+    override suspend fun getTracksByIds(trackIds: List<Int>): List<Track> {
+        if (trackIds.isEmpty()) return emptyList()
+        val entities = appDatabase.trackInPlaylistDao().getTracksByIds(trackIds)
+        return trackIds.mapNotNull { trackId ->
+            entities.find { it.trackId == trackId }?.let { entity ->
+                Track(
+                    trackId = entity.trackId,
+                    trackName = entity.trackName,
+                    artistName = entity.artistName,
+                    trackTimeMillis = entity.trackTimeMillis,
+                    artworkUrl100 = entity.artworkUrl100,
+                    collectionName = entity.collectionName,
+                    releaseDate = entity.releaseDate,
+                    primaryGenreName = entity.primaryGenreName,
+                    country = entity.country,
+                    previewUrl = entity.previewUrl
+                )
+            }
+        }
+    }
+
+    override suspend fun deleteTrackFromPlaylist(playlistId: Long, trackId: Int) {
+        val playlistEntity = appDatabase.playlistDao().getPlaylistById(playlistId) ?: return
+        val playlist = playlistDbConvertor.map(playlistEntity)
+
+        val updatedTrackIds = playlist.trackIds.filter { it != trackId }
+        val updatedPlaylist = playlist.copy(
+            trackIds = updatedTrackIds,
+            trackCount = playlist.trackCount - 1
+        )
+        appDatabase.playlistDao().updatePlaylist(playlistDbConvertor.map(updatedPlaylist))
+
+        val trackExistsElsewhere = appDatabase.playlistDao()
+            .doesTrackExistInOtherPlaylists(trackId, playlistId)
+
+        if (!trackExistsElsewhere) {
+            appDatabase.trackInPlaylistDao().deleteTrack(trackId)
+        }
     }
 }

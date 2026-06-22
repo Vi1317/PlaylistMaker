@@ -8,9 +8,13 @@ import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.example.playlistmaker.search.domain.api.TracksInteractor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
@@ -23,19 +27,25 @@ class SearchViewModel(
 
     private var searchJob: Job? = null
 
+    private var currentSearchQuery: String? = null
+
+    private var cachedFavoriteIds = emptyList<Int>()
+
     init {
         loadHistory()
+        loadFavorites()
     }
 
     private fun loadHistory() {
         viewModelScope.launch {
-            val history = searchHistoryInteractor.getHistory()
-            val favoriteIds = favoriteInteractor.getFavoriteIds()
-
-            val updatedHistory = history.map { track ->
-                track.apply { isFavorite = favoriteIds.contains(track.trackId) }
+            val updatedHistory = withContext(Dispatchers.IO) {
+                val history = searchHistoryInteractor.getHistory()
+                history.map { track ->
+                    track.copy(
+                        isFavorite = cachedFavoriteIds.contains(track.trackId)
+                    )
+                }
             }
-
             _state.value = _state.value?.copy(
                 showHistory = true,
                 historyTracks = updatedHistory,
@@ -44,13 +54,21 @@ class SearchViewModel(
         }
     }
 
+    private fun loadFavorites() {
+        viewModelScope.launch(Dispatchers.IO) {
+            cachedFavoriteIds = favoriteInteractor.getFavoriteIds()
+        }
+    }
+
     fun searchDebounce(query: String) {
-        if (query.isEmpty()) {
+        searchJob?.cancel()
+        if (query.isBlank()) {
+            currentSearchQuery = null
             loadHistory()
             return
         }
 
-        searchJob?.cancel()
+        currentSearchQuery = query
 
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_DELAY)
@@ -61,44 +79,76 @@ class SearchViewModel(
     private suspend fun searchRequest(query: String) {
         _state.value = _state.value?.copy(
             isLoading = true,
-            showHistory = false
+            showHistory = false,
+            isError = false,
+            isEmpty = false
         )
 
-        tracksInteractor.searchTracks(query).collect { pair ->
-            processResult(pair.first, pair.second)
+        try {
+            val resultPair = tracksInteractor.searchTracks(query).first()
+
+            if (query != currentSearchQuery) return
+
+            val (tracks, errorMessage) = resultPair
+            processResult(tracks, errorMessage, query)
+
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (query == currentSearchQuery) {
+                _state.value = _state.value?.copy(
+                    isLoading = false,
+                    isError = true,
+                    tracks = emptyList()
+                )
+            }
         }
     }
 
-    private suspend fun processResult(foundTracks: List<Track>?, errorMessage: String?) {
+    private suspend fun processResult(
+        foundTracks: List<Track>?,
+        errorMessage: String?,
+        query: String
+    ) {
+        if (query != currentSearchQuery) return
+
         when {
             errorMessage != null -> {
                 _state.value = _state.value?.copy(
                     isLoading = false,
                     isError = true,
                     isEmpty = false,
+                    showHistory = false,
                     tracks = emptyList()
                 )
             }
+
             foundTracks.isNullOrEmpty() -> {
                 _state.value = _state.value?.copy(
                     isLoading = false,
                     isError = false,
                     isEmpty = true,
+                    showHistory = false,
                     tracks = emptyList()
                 )
             }
+
             else -> {
-                val favoriteIds = favoriteInteractor.getFavoriteIds()
+                val favoriteIds = withContext(Dispatchers.IO) {
+                    favoriteInteractor.getFavoriteIds()
+                }
+
+                if (query != currentSearchQuery) return
 
                 val updatedTracks = foundTracks.map { track ->
-                    track.apply {
-                        isFavorite = favoriteIds.contains(track.trackId)
-                    }
+                    track.copy(isFavorite = favoriteIds.contains(track.trackId))
                 }
+
                 _state.value = _state.value?.copy(
                     isLoading = false,
                     isError = false,
                     isEmpty = false,
+                    showHistory = false,
                     tracks = updatedTracks
                 )
             }
@@ -114,12 +164,8 @@ class SearchViewModel(
         loadHistory()
     }
 
-    fun onSearchCleared() {
-        loadHistory()
-    }
-
     companion object {
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val SEARCH_DEBOUNCE_DELAY = 500L
     }
 }
 

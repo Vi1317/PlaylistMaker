@@ -10,8 +10,9 @@ import com.example.playlistmaker.search.domain.Track
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class TrackAdapter (private val tracks: List<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter (private val tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
     var onTrackClick: ((Track) -> Unit)? = null
+    var onTrackLongClick: ((Track) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = TrackListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -20,13 +21,25 @@ class TrackAdapter (private val tracks: List<Track>) : RecyclerView.Adapter<Trac
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(tracks[position])
+
         holder.itemView.setOnClickListener {
             onTrackClick?.invoke(tracks[position])
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onTrackLongClick?.invoke(tracks[position])
+            true
         }
     }
 
     override fun getItemCount(): Int {
         return tracks.size
+    }
+
+    fun updateTracks(newTracks: List<Track>) {
+        tracks.clear()
+        tracks.addAll(newTracks)
+        notifyDataSetChanged()
     }
 }
 

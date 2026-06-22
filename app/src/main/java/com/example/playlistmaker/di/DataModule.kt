@@ -1,7 +1,6 @@
 package com.example.playlistmaker.di
 
 import android.content.Context
-import android.media.MediaPlayer
 import androidx.room.Room
 import com.example.playlistmaker.creator.ResourcesProviderImpl
 import com.example.playlistmaker.media.data.converters.FavoriteDbConvertor
@@ -57,10 +56,6 @@ val dataModule = module {
 
     single<ResourcesProvider> {
         ResourcesProviderImpl(androidContext())
-    }
-
-    factory {
-        MediaPlayer()
     }
 
     //БД

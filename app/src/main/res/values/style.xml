@@ -142,5 +142,9 @@
 
     <style name="CustomAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="colorPrimary">@color/blue</item>
+        <item name="android:background">@color/dialog_bg</item>
+        <item name="android:windowBackground">@color/dialog_bg</item>
+        <item name="colorOnPrimary">?attr/colorOnPrimary</item>
+
     </style>
 </resources>
