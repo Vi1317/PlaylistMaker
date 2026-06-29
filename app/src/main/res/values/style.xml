@@ -147,4 +147,9 @@
         <item name="colorOnPrimary">?attr/colorOnPrimary</item>
 
     </style>
+
+    <declare-styleable name="PlaybackButtonView">
+        <attr name="imagePlayResId" format="reference"/>
+        <attr name="imagePauseResId" format="reference"/>
+    </declare-styleable>
 </resources>

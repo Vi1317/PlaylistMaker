@@ -141,7 +141,7 @@ class PlayerFragment : Fragment() {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
 
-            playBtn.setOnClickListener {
+            playBtn.onStateChanged = {
                 viewModel.onPlayButtonClicked()
             }
 
@@ -154,10 +154,8 @@ class PlayerFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.playBtn.isEnabled = state.isPlayButtonEnabled
-            binding.playBtn.setImageResource(
-                if (state.isPlaying) R.drawable.ic_pause_100
-                else R.drawable.ic_play_100
-            )
+            binding.playBtn.setIsPlaying(state.isPlaying)
+
             binding.playTime.text = state.currentTime
 
             if (state.isFavorite) {
