@@ -1,15 +1,14 @@
 package com.example.playlistmaker.player.ui
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.RectF
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.StyleRes
-import androidx.core.graphics.drawable.toBitmap
 import com.example.playlistmaker.R
 
 class PlaybackButtonView @JvmOverloads constructor(
@@ -19,12 +18,11 @@ class PlaybackButtonView @JvmOverloads constructor(
     @StyleRes defStyleRes: Int = 0,
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var imagePlay: Bitmap? = null
-    private var imagePause: Bitmap? = null
-    private val imageRect = RectF()
+    private var imagePlay: Drawable? = null
+    private var imagePause: Drawable? = null
+    private val drawableBounds = Rect()
     private var isPlaying: Boolean = false
     var onStateChanged: (() -> Unit)? = null
-    private val defaultSizePx = (100 * resources.displayMetrics.density).toInt()
 
     init {
         context.theme.obtainStyledAttributes(
@@ -34,8 +32,8 @@ class PlaybackButtonView @JvmOverloads constructor(
             defStyleRes
         ).apply {
             try {
-                imagePlay = getDrawable(R.styleable.PlaybackButtonView_imagePlayResId)?.toBitmap()
-                imagePause = getDrawable(R.styleable.PlaybackButtonView_imagePauseResId)?.toBitmap()
+                imagePlay = getDrawable(R.styleable.PlaybackButtonView_imagePlayResId)
+                imagePause = getDrawable(R.styleable.PlaybackButtonView_imagePauseResId)
             } finally {
                 recycle()
             }
@@ -43,27 +41,29 @@ class PlaybackButtonView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val bitmap = imagePlay ?: imagePause
-        val desiredSize = bitmap?.width ?: defaultSizePx
+        val drawable = imagePlay ?: imagePause
+        val intrinsicWidth = drawable?.intrinsicWidth ?: suggestedMinimumWidth
+        val intrinsicHeight = drawable?.intrinsicHeight ?: suggestedMinimumHeight
 
-        val width = resolveSize(desiredSize, widthMeasureSpec)
-        val height = resolveSize(desiredSize, heightMeasureSpec)
+        val width = resolveSize(intrinsicWidth, widthMeasureSpec)
+        val height = resolveSize(intrinsicHeight, heightMeasureSpec)
 
         setMeasuredDimension(width, height)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        imageRect.set(0f, 0f, w.toFloat(), h.toFloat())
+        drawableBounds.set(0, 0, w, h)
+
+        imagePlay?.bounds = drawableBounds
+        imagePause?.bounds = drawableBounds
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val bitmapToDraw = if (isPlaying) imagePause else imagePlay
-        bitmapToDraw?.let {
-            canvas.drawBitmap(it, null, imageRect, null)
-        }
+        val drawableToDraw = if (isPlaying) imagePause else imagePlay
+        drawableToDraw?.draw(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
