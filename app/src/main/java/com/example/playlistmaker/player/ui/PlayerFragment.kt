@@ -1,10 +1,20 @@
 package com.example.playlistmaker.player.ui
 
+import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +23,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.playlistmaker.R
 import com.example.playlistmaker.databinding.FragmentPlayerBinding
 import com.example.playlistmaker.media.ui.PlaylistBottomSheetAdapter
+import com.example.playlistmaker.player.services.MusicService
 import com.example.playlistmaker.player.viewmodel.PlayerViewModel
 import com.example.playlistmaker.search.domain.Track
 import com.example.playlistmaker.util.showCustomToast
@@ -43,6 +54,8 @@ class PlayerFragment : Fragment() {
     private lateinit var binding: FragmentPlayerBinding
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var playlistAdapter: PlaylistBottomSheetAdapter
+
+    private var isServiceBound = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,6 +113,43 @@ class PlayerFragment : Fragment() {
 
         initViews(track)
         observeViewModel()
+
+        bindToService()
+        requestNotificationPermissionIfNeeded()
+    }
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MusicService.MusicServiceBinder
+            viewModel.bindService(
+                interactor = binder.getPlayerInteractor(),
+                service = binder.getService()
+            )
+            isServiceBound = true
+
+            binding.playBtn.alpha = 1f
+            binding.playBtn.isEnabled = viewModel.state.value?.isPlayButtonEnabled == true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            viewModel.unbindService()
+            isServiceBound = false
+        }
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun initViews(track: Track) {
@@ -153,7 +203,7 @@ class PlayerFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
-            binding.playBtn.isEnabled = state.isPlayButtonEnabled
+            binding.playBtn.isEnabled = state.isPlayButtonEnabled && isServiceBound
             binding.playBtn.setIsPlaying(state.isPlaying)
 
             binding.playTime.text = state.currentTime
@@ -175,6 +225,34 @@ class PlayerFragment : Fragment() {
             state.addToPlaylistMessage?.let { message ->
                 showCustomToast(requireContext(), message)
             }
+        }
+    }
+
+    private fun bindToService() {
+        Intent(requireContext(), MusicService::class.java).apply {
+            requireContext().bindService(this, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (isServiceBound) {
+            viewModel.onAppForegrounded()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isServiceBound && viewModel.state.value?.isPlaying == true) {
+            viewModel.onAppBackgrounded()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isServiceBound) {
+            requireContext().unbindService(serviceConnection)
+            isServiceBound = false
         }
     }
 

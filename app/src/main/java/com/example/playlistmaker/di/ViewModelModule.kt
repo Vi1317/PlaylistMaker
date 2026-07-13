@@ -19,7 +19,7 @@ val viewModelModule = module {
 
     //Плеер
     viewModel { (track: Track) ->
-        PlayerViewModel(get(), get(),get(), get(), track)
+        PlayerViewModel(get(), get(), get(), track)
     }
 
     //Настройки
