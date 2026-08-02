@@ -4,34 +4,29 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.playlistmaker.R
 import com.example.playlistmaker.media.domain.db.FavoriteInteractor
 import com.example.playlistmaker.media.domain.db.PlaylistInteractor
 import com.example.playlistmaker.media.domain.models.Playlist
 import com.example.playlistmaker.player.domain.PlayerInteractor
+import com.example.playlistmaker.player.services.MusicService
 import com.example.playlistmaker.search.domain.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class PlayerViewModel(
     application: Application,
-    private val playerInteractor: PlayerInteractor,
     private val favoriteInteractor: FavoriteInteractor,
     private val playlistInteractor: PlaylistInteractor,
     private val track: Track
 ) : AndroidViewModel(application) {
 
-    companion object {
-        private const val UPDATE_DELAY = 300L
-    }
-
-    private var timerJob: Job? = null
-    private var isPlaying = false
+    private var playerInteractor: PlayerInteractor? = null
+    private var musicService: MusicService? = null
+    private var serviceObservationJob: Job? = null
 
     private val _state = MutableLiveData(
         PlayerState(
@@ -48,16 +43,27 @@ class PlayerViewModel(
 
 
     init {
-        playerInteractor.setOnPreparedListener {
+        viewModelScope.launch {
+            loadPlaylists()
+        }
+    }
+
+    fun bindService(interactor: PlayerInteractor, service: MusicService) {
+        playerInteractor = interactor
+        musicService = service
+
+        service.setTrackInfo(track.artistName, track.trackName)
+
+        playerInteractor?.prepare(track.previewUrl)
+
+        playerInteractor?.setOnPreparedListener {
             _state.value = _state.value?.copy(
                 isPlayButtonEnabled = true,
                 isPlaying = false,
                 currentTime = "00:00"
             )
         }
-        playerInteractor.setOnCompletionListener {
-            isPlaying = false
-            timerJob?.cancel()
+        playerInteractor?.setOnCompletionListener {
             _state.value = _state.value?.copy(
                 isPlayButtonEnabled = true,
                 isPlaying = false,
@@ -65,17 +71,43 @@ class PlayerViewModel(
             )
         }
 
-        playerInteractor.prepare(track.previewUrl)
+        observeServiceState()
+    }
 
-        loadPlaylists()
+    fun unbindService() {
+        serviceObservationJob?.cancel()
+        playerInteractor = null
+        musicService = null
+    }
+
+    private fun observeServiceState() {
+        serviceObservationJob = viewModelScope.launch {
+            musicService?.playerState?.collectLatest { serviceState ->
+                _state.value = _state.value?.copy(
+                    isPlayButtonEnabled = serviceState.isPrepared,
+                    isPlaying = serviceState.isPlaying,
+                    currentTime = serviceState.currentTime
+                )
+            }
+        }
     }
 
     fun onPlayButtonClicked() {
-        if (isPlaying) {
-            stopTimer()
+        if (_state.value?.isPlaying == true) {
+            playerInteractor?.pause()
         } else {
-            startTimer()
+            playerInteractor?.start()
         }
+    }
+
+    fun onAppBackgrounded() {
+        if (_state.value?.isPlaying == true) {
+            musicService?.showForegroundNotification()
+        }
+    }
+
+    fun onAppForegrounded() {
+        musicService?.hideForegroundNotification()
     }
 
     fun onFavoriteClicked() {
@@ -141,39 +173,9 @@ class PlayerViewModel(
         }
     }
 
-    private fun startTimer() {
-        playerInteractor.start()
-        isPlaying = true
-        updateTime()
-        _state.postValue(_state.value?.copy(isPlaying = true))
-    }
-
-    private fun stopTimer() {
-        playerInteractor.pause()
-        isPlaying = false
-        timerJob?.cancel()
-        _state.postValue(_state.value?.copy(isPlaying = false))
-    }
-
-    private fun updateTime() {
-        timerJob?.cancel()
-        timerJob = viewModelScope.launch {
-            while (isPlaying) {
-                val time = formatTime(playerInteractor.getCurrentPosition())
-                _state.postValue(_state.value?.copy(currentTime = time))
-                delay(UPDATE_DELAY)
-            }
-        }
-    }
-
-    private fun formatTime(millis: Int): String {
-        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
-    }
-
     override fun onCleared() {
         super.onCleared()
-        timerJob?.cancel()
-        playerInteractor.release()
+        unbindService()
     }
 }
 
