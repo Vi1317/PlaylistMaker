@@ -1,6 +1,11 @@
 [versions]
+activityCompose = "1.13.0"
+compose = "1.0.0-beta10"
+composeBom = "2024.06.00"
 activityKtx = "1.12.4"
 agp = "8.12.3"
+androidxMaterial = "1.11.4"
+composeThemeAdapterX = "1.1.1"
 coreKtxVersion = "1.16.0"
 fragmentKtx = "1.8.9"
 glide = "5.0.5"
@@ -15,23 +20,42 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
 kotlinxCoroutinesAndroid = "1.10.2"
+lifecycleViewmodelCompose = "2.11.0"
 lifecycleViewmodelKtx = "2.10.0"
 material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+materialCompanionThemeAdapter3 = "1.0.0"
 materialVersion = "1.8.0"
 navigationFragmentKtx = "2.9.7"
 retrofit = "3.0.0"
 material3 = "1.4.0"
+roomRuntime = "2.8.4"
+runtimeLivedata = "1.11.4"
+ui = "1.11.4"
+uiText = "1.11.4"
 
 [libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-ktx-v1160 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-material = { module = "androidx.compose.material:material", version.ref = "androidxMaterial" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
+compose-theme-adapter-x = { module = "com.google.android.material:compose-theme-adapter-3", version.ref = "composeThemeAdapterX" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -45,12 +69,14 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+material-companion-theme-adapter3 = { module = "com.google.android.material:material-companion-theme-adapter3", version.ref = "materialCompanionThemeAdapter3" }
 material-v1130 = { module = "com.google.android.material:material", version.ref = "googleMaterial" }
 material-v180 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-compose-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

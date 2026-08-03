@@ -2,14 +2,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.10"
 }
 
 android {
     namespace = "com.example.playlistmaker"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.playlistmaker"
@@ -30,10 +29,13 @@ android {
             )
         }
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -47,6 +49,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -74,8 +77,18 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
-    val room_version = "2.8.4"
-    implementation("androidx.room:room-runtime:${room_version}")
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:${room_version}")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.compose)
+
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 }

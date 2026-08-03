@@ -4,46 +4,50 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.playlistmaker.R
-import com.example.playlistmaker.databinding.FragmentMediaBinding
-import com.google.android.material.tabs.TabLayoutMediator
+import com.example.playlistmaker.media.viewmodel.FavoriteViewModel
+import com.example.playlistmaker.media.viewmodel.PlaylistViewModel
+import com.example.playlistmaker.player.ui.PlayerFragment
+import com.example.playlistmaker.ui.PlaylistMakerTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MediaFragment : Fragment() {
-    private var _binding: FragmentMediaBinding? = null
-    private val binding get() = _binding!!
-    private lateinit var tabsMediator: TabLayoutMediator
+
+    private val playlistViewModel: PlaylistViewModel by viewModel()
+    private val favoriteViewModel: FavoriteViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentMediaBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.viewPager.adapter = FragmentsAdapter(childFragmentManager, lifecycle)
-
-        tabsMediator = TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, pos ->
-            when (pos) {
-                0 -> tab.text = getString(R.string.favorite)
-                1 -> tab.text = getString(R.string.playlist)
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                PlaylistMakerTheme(darkTheme = false) {
+                    MediaScreen(
+                        favoriteViewModel = favoriteViewModel,
+                        playlistViewModel = playlistViewModel,
+                        onTrackClick = { track ->
+                            findNavController().navigate(
+                                R.id.action_global_playerFragment,
+                                PlayerFragment.createArgs(track)
+                            )
+                        },
+                        onPlaylistClick = { playlistId ->
+                            findNavController().navigate(
+                                R.id.action_mediaFragment_to_playlistDetailsFragment,
+                                PlaylistDetailsFragment.createArgs(playlistId)
+                            )
+                        },
+                        onNewPlaylistClick = {
+                            findNavController().navigate(R.id.action_mediaFragment_to_newPlaylistFragment)
+                        }
+                    )
+                }
             }
         }
-        tabsMediator.attach()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        tabsMediator.detach()
-        _binding = null
-    }
-
-    companion object {
-        const val TAG = "MediaFragment"
     }
 }
